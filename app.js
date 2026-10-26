@@ -1,12 +1,14 @@
+// Supabase Bağlantı Bilgileri
 const SUPABASE_URL = 'https://bkeckhwhakvrmgdifukg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZWNraHdoYWt2cm1nZGlmdWtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMTg2NDEsImV4cCI6MjEwODU5NDY0MX0.Y3n4B8g6K8Wr_HSxD4NH9Sc7bMlZkG-gcz_Q2DQSiNw';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 document.addEventListener('DOMContentLoaded', async () => {
-    await checkUserSession();
+    // Sayfa açılır açılmaz oturumu kontrol et ve sağ üstü güncelle
+    await updateAuthUI();
 
-    // Giriş Yap İşlemi
+    // Giriş Yap Form Gönderimi
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -21,12 +23,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 alert("Giriş Başarılı!");
                 closeModal('loginModal');
-                await checkUserSession();
+                await updateAuthUI(); // Giriş yapınca arayüzü anında güncelle
             }
         });
     }
 
-    // Kayıt Ol İşlemi
+    // Kayıt Ol Form Gönderimi
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
@@ -45,7 +47,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Profil Kaydetme
+    // Profil Bilgilerini Kaydetme Formu
     const profileForm = document.getElementById('profileForm');
     if (profileForm) {
         profileForm.addEventListener('submit', (e) => {
@@ -55,22 +57,23 @@ document.addEventListener('DOMContentLoaded', async () => {
             const mcName = document.getElementById('profileMcName').value;
             const userClass = document.getElementById('profileClass').value;
 
-            alert(`Profil Bilgileri Kaydedildi!\nAd Soyad: ${name} ${surname}\nMC Adı: ${mcName}\nSınıf: ${userClass}. Sınıf`);
+            alert(`Profil Bilgileri Başarıyla Kaydedildi!\nAd Soyad: ${name} ${surname}\nMC Adı: ${mcName}\nSınıf: ${userClass}. Sınıf`);
             closeModal('profileModal');
         });
     }
 
-    // Çıkış Yap
+    // Çıkış Yap Butonu
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             await supabase.auth.signOut();
+            await updateAuthUI(); // Çıkış yapınca butonları eski haline getir
             window.location.reload();
         });
     }
 
-    // Profil Menüsü Aç/Kapat
+    // Sağ Üst Profil Açılır Menüsü (Dropdown) Yönetimi
     const userMenuBtn = document.getElementById('userMenuBtn');
     const userDropdown = document.getElementById('userDropdown');
     if (userMenuBtn && userDropdown) {
@@ -85,23 +88,28 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-async function checkUserSession() {
-    const { data: { session } } = await supabase.auth.getSession();
-    const guestGroup = document.getElementById('guestGroup');
-    const userGroup = document.getElementById('userGroup');
-    const userEmailText = document.getElementById('userEmailText');
+// Arayüzdeki Giriş / Profil Durumunu Güncelleyen Fonksiyon
+async function updateAuthUI() {
+    try {
+        const { data: { session } } = await supabase.auth.getSession();
+        const guestGroup = document.getElementById('guestGroup');
+        const userGroup = document.getElementById('userGroup');
+        const userEmailText = document.getElementById('userEmailText');
 
-    if (session) {
-        if (guestGroup) guestGroup.style.display = 'none';
-        if (userGroup) userGroup.style.display = 'block';
-        if (userEmailText) userEmailText.textContent = session.user.email;
-    } else {
-        if (guestGroup) guestGroup.style.display = 'flex';
-        if (userGroup) userGroup.style.display = 'none';
+        if (session && session.user) {
+            if (guestGroup) guestGroup.style.display = 'none';
+            if (userGroup) userGroup.style.display = 'block';
+            if (userEmailText) userEmailText.textContent = session.user.email;
+        } else {
+            if (guestGroup) guestGroup.style.display = 'flex';
+            if (userGroup) userGroup.style.display = 'none';
+        }
+    } catch (err) {
+        console.error("Oturum kontrol hatası:", err);
     }
 }
 
-// Mağaza/VIP Buton Tıklama Kontrolü ve Samet Mesajı
+// Mağaza, VIP ve Sikke Paketlerindeki Butonların Ortak Kontrolü (Samet Uyarısı)
 document.addEventListener('click', async (e) => {
     const target = e.target.closest('.buy-action-btn');
     if (!target) return;
