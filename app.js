@@ -2,10 +2,9 @@
 const SUPABASE_URL = 'https://bkeckhwhakvrmgdifukg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZWNraHdoYWt2cm1nZGlmdWtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMTg2NDEsImV4cCI6MjEwODU5NDY0MX0.Y3n4B8g6K8Wr_HSxD4NH9Sc7bMlZkG-gcz_Q2DQSiNw';
 
-// Değişken ismini 'db' yaparak çakışmayı %100 önledik
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Arayüzü Giriş Durumuna Göre Değiştiren Ana Fonksiyon
+// Arayüzü Kullanıcı Oturumuna Göre Güncelleme
 async function syncUserUI() {
     try {
         const { data: { session } } = await db.auth.getSession();
@@ -26,16 +25,33 @@ async function syncUserUI() {
     }
 }
 
+// Kullanıcı Profil Bilgilerini Veritabanından Yükleme
+async function loadUserProfile() {
+    const { data: { session } } = await db.auth.getSession();
+    if (!session) return;
+
+    const { data, error } = await db
+        .from('profiles')
+        .select('*')
+        .eq('id', session.user.id)
+        .single();
+
+    if (data) {
+        if(document.getElementById('profileName')) document.getElementById('profileName').value = data.first_name || '';
+        if(document.getElementById('profileSurname')) document.getElementById('profileSurname').value = data.last_name || '';
+        if(document.getElementById('profileMcName')) document.getElementById('profileMcName').value = data.mc_ign || '';
+        if(document.getElementById('profileClass')) document.getElementById('profileClass').value = data.grade || '5';
+    }
+}
+
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Sayfa Açılır Açılmaz Kullanıcı Oturumunu Kontrol Et
     await syncUserUI();
 
-    // 2. Supabase Canlı Oturum Dinleyicisi
     db.auth.onAuthStateChange(async (event, session) => {
         await syncUserUI();
     });
 
-    // 3. Giriş Yap Form İşlemi
+    // Giriş Yap Formu
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -55,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 4. Kayıt Ol Form İşlemi
+    // Kayıt Ol Formu
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
@@ -74,22 +90,51 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 5. Kişisel Bilgileri Kaydetme Form İşlemi
+    // Kişisel Bilgileri Hesaba (Database) Kaydetme
     const profileForm = document.getElementById('profileForm');
     if (profileForm) {
-        profileForm.addEventListener('submit', (e) => {
+        profileForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const name = document.getElementById('profileName').value;
-            const surname = document.getElementById('profileSurname').value;
-            const mcName = document.getElementById('profileMcName').value;
-            const userClass = document.getElementById('profileClass').value;
+            const { data: { session } } = await db.auth.getSession();
+            
+            if (!session) {
+                alert("Lütfen önce giriş yapın!");
+                return;
+            }
 
-            alert(`Profil Bilgileri Başarıyla Kaydedildi!\nAd Soyad: ${name} ${surname}\nMC Adı: ${mcName}\nSınıf: ${userClass}. Sınıf`);
-            closeModal('profileModal');
+            const firstName = document.getElementById('profileName').value.trim();
+            const lastName = document.getElementById('profileSurname').value.trim();
+            const mcIgn = document.getElementById('profileMcName').value.trim();
+            const grade = document.getElementById('profileClass').value;
+
+            const { error } = await db.from('profiles').upsert({
+                id: session.user.id,
+                first_name: firstName,
+                last_name: lastName,
+                mc_ign: mcIgn,
+                grade: grade,
+                updated_at: new Date()
+            });
+
+            if (error) {
+                alert("Profil Kaydedilemedi: " + error.message);
+            } else {
+                alert("Profil Bilgileriniz Hesabınıza Başarıyla Kaydedildi!");
+                closeModal('profileModal');
+            }
         });
     }
 
-    // 6. Çıkış Yap Butonu
+    // Kişisel Bilgiler Modalı Açıldığında Verileri Getir
+    const openProfileModalBtn = document.getElementById('openProfileModalBtn');
+    if (openProfileModalBtn) {
+        openProfileModalBtn.addEventListener('click', async () => {
+            await loadUserProfile();
+            openModal('profileModal');
+        });
+    }
+
+    // Çıkış Yap Butonu
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async (e) => {
@@ -101,7 +146,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 7. Sağ Üst Profil Menüsü Açma / Kapama
+    // Sağ Üst Profil Menüsü Açma / Kapama
     const userMenuBtn = document.getElementById('userMenuBtn');
     const userDropdown = document.getElementById('userDropdown');
     if (userMenuBtn && userDropdown) {
@@ -116,7 +161,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// 8. VIP ve Sikke Butonlarına Tıklandığında Ekrana Gelecek Uyarı
+// Mağaza / VIP / Sikke Tıklama Uyarısı (Samet Mesajı)
 document.addEventListener('click', async (e) => {
     const target = e.target.closest('.buy-action-btn');
     if (!target) return;
