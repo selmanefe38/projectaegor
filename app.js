@@ -2,7 +2,7 @@
 const SUPABASE_URL = 'https://bkeckhwhakvrmgdifukg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZWNraHdoYWt2cm1nZGlmdWtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMTg2NDEsImV4cCI6MjEwODU5NDY0MX0.Y3n4B8g6K8Wr_HSxD4NH9Sc7bMlZkG-gcz_Q2DQSiNw';
 
-// Çakışmayı %100 önlemek için değişken adını 'db' yaptık
+// Değişken ismini 'db' yaparak çakışmayı %100 önledik
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Arayüzü Giriş Durumuna Göre Değiştiren Ana Fonksiyon
