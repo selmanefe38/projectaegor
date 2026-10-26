@@ -275,11 +275,13 @@
             </ul>
             
             <div class="auth-btns" id="authButtons">
+                <!-- Giriş Yapılmamışsa Görünecek Butonlar -->
                 <div id="guestGroup" style="display: flex; gap: 10px;">
                     <button type="button" class="btn btn-secondary" onclick="openModal('loginModal')">Giriş Yap</button>
                     <button type="button" class="btn btn-primary" onclick="openModal('registerModal')">Kayıt Ol</button>
                 </div>
 
+                <!-- Giriş Yapılmışsa Görünecek Profil Butonu ve Menü -->
                 <div id="userGroup" style="display: none; position: relative;">
                     <button type="button" class="btn btn-secondary" id="userMenuBtn">
                         <i class="fa-solid fa-user"></i> <span id="userEmailText">Kullanıcı</span> <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
@@ -316,7 +318,7 @@
             <div class="feature-card">
                 <i class="fa-solid fa-user-group" style="font-size:2rem; color:var(--primary); margin-bottom:1rem;"></i>
                 <h3>Özel Odalar</h3>
-                <p>VIP and VIP+ üyelere özel çalışma ve ders odaları.</p>
+                <p>VIP ve VIP+ üyelere özel çalışma ve ders odaları.</p>
             </div>
             <div class="feature-card">
                 <i class="fa-solid fa-coins" style="font-size:2rem; color:var(--primary); margin-bottom:1rem;"></i>
