@@ -6,9 +6,9 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 document.addEventListener('DOMContentLoaded', async () => {
     // 1. Mevcut Oturumu Kontrol Et
-    checkUserSession();
+    await checkUserSession();
 
-    // 2. Giriş Formu
+    // 2. Giriş Yap Formu
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -23,7 +23,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 alert("Giriş Başarılı!");
                 closeModal('loginModal');
-                checkUserSession();
+                await checkUserSession();
             }
         });
     }
@@ -41,13 +41,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (error) {
                 alert("Kayıt Hatası: " + error.message);
             } else {
-                alert("Kayıt Başarılı! E-postanızı kontrol edip onaylayın.");
+                alert("Kayıt Başarılı! E-postanızı doğruladıktan sonra giriş yapabilirsiniz.");
                 closeModal('registerModal');
             }
         });
     }
 
-    // 4. Profil Bilgileri Formu
+    // 4. Profil Formu Kaydetme
     const profileForm = document.getElementById('profileForm');
     if (profileForm) {
         profileForm.addEventListener('submit', (e) => {
@@ -62,16 +62,17 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 5. Çıkış Yap
+    // 5. Çıkış Yap Butonu
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
+        logoutBtn.addEventListener('click', async (e) => {
+            e.preventDefault();
             await supabase.auth.signOut();
             window.location.reload();
         });
     }
 
-    // 6. Profil Açılır Menüsü (Dropdown) Göster/Gizle
+    // 6. Profil Açılır Menüsü (Dropdown) Kontrolü
     const userMenuBtn = document.getElementById('userMenuBtn');
     const userDropdown = document.getElementById('userDropdown');
     if (userMenuBtn && userDropdown) {
@@ -86,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Oturum Durumunu Güncelleyen Fonksiyon
+// Kullanıcı Oturumunu Kontrol Eden ve Ekranı Düzenleyen Fonksiyon
 async function checkUserSession() {
     const { data: { session } } = await supabase.auth.getSession();
     const guestGroup = document.getElementById('guestGroup');
@@ -103,11 +104,12 @@ async function checkUserSession() {
     }
 }
 
-// VIP ve Sikke Paketlerindeki Bütün Satın Al / İncele Butonlarının Ortak Kontrolü
+// Bütün Mağaza / VIP / Sikke Butonlarında Sayfa Kaymasını Önleyen ve Uyarısı Veren Mantık
 document.addEventListener('click', async (e) => {
     if (e.target.classList.contains('buy-action-btn')) {
         e.preventDefault();
-        
+        e.stopPropagation();
+
         const { data: { session } } = await supabase.auth.getSession();
 
         if (!session) {
