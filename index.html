@@ -108,7 +108,6 @@
         .btn-secondary { background: rgba(255, 255, 255, 0.1); color: var(--text-light); border: 1px solid var(--card-border); }
         .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); }
 
-        /* Profil Açılır Menü Stilleri */
         .user-dropdown {
             display: none;
             position: absolute;
@@ -275,13 +274,11 @@
             </ul>
             
             <div class="auth-btns" id="authButtons">
-                <!-- Giriş Yapılmamışsa Görünecek Grup -->
                 <div id="guestGroup" style="display: flex; gap: 10px;">
                     <button type="button" class="btn btn-secondary" onclick="openModal('loginModal')">Giriş Yap</button>
                     <button type="button" class="btn btn-primary" onclick="openModal('registerModal')">Kayıt Ol</button>
                 </div>
 
-                <!-- Giriş Yapılmışsa Görünecek Profil Grubu -->
                 <div id="userGroup" style="display: none; position: relative;">
                     <button type="button" class="btn btn-secondary" id="userMenuBtn">
                         <i class="fa-solid fa-user"></i> <span id="userEmailText">Kullanıcı</span> <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
@@ -416,7 +413,6 @@
     <script src="app.js"></script>
 
     <script>
-        // Sikke Paketlerini Oluşturma
         const coinsContainer = document.getElementById('coinsContainer');
         if (coinsContainer) {
             let initialCoins = 100;
