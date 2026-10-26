@@ -6,7 +6,7 @@ const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let teacherCodeCount = 0; // Maksimum 3 kullanım takibi
 
-// Arayüzü Giriş Durumuna Göre Değiştirme
+// Arayüzü Kullanıcı Oturumuna Göre Güncelleme
 async function syncUserUI() {
     try {
         const { data: { session } } = await db.auth.getSession();
@@ -92,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Kişisel Bilgileri Hesaba Kaydetme
+    // Kişisel Bilgileri Hesaba Kaydetme & Doğrudan Kod Sorma Akışı
     const profileForm = document.getElementById('profileForm');
     if (profileForm) {
         profileForm.addEventListener('submit', async (e) => {
@@ -123,8 +123,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 alert("Profil Bilgileriniz Hesabınıza Başarıyla Kaydedildi!");
                 closeModal('profileModal');
-                // Kaydettikten sonra soru modalını aç
-                openModal('authQuestionModal');
+                
+                // Kaydettikten hemen sonra "Yetkili Misiniz?" penceresini açıyoruz
+                setTimeout(() => {
+                    openModal('authQuestionModal');
+                }, 300);
             }
         });
     }
@@ -134,7 +137,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (authYesBtn) {
         authYesBtn.addEventListener('click', () => {
             closeModal('authQuestionModal');
-            openModal('authCodeModal');
+            setTimeout(() => {
+                openModal('authCodeModal');
+            }, 300);
         });
     }
 
@@ -143,7 +148,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (authNoBtn) {
         authNoBtn.addEventListener('click', () => {
             closeModal('authQuestionModal');
-            alert("Kayıt tamamlandı, iyi oyunlar!");
+            alert("Kayıt işleminiz tamamlandı. İyi oyunlar dileriz!");
         });
     }
 
@@ -157,42 +162,43 @@ document.addEventListener('DOMContentLoaded', async () => {
                 alert("Yetkili Kodu Doğrulandı! Öğretmen Kodu Sayfanız Açıldı.");
                 closeModal('authCodeModal');
                 
-                // Sağ üst menüde Öğretmen Kod Sayfası butonunu görünür yap
+                // Sağ üst menüde Öğretmen Kod Sayfası butonunu aktif yap
                 const openTeacherPanelBtn = document.getElementById('openTeacherPanelBtn');
                 if (openTeacherPanelBtn) openTeacherPanelBtn.style.display = 'block';
 
-                // Öğretmen Kod Sayfasını Aç
-                openModal('teacherPanelModal');
+                setTimeout(() => {
+                    openModal('teacherPanelModal');
+                }, 300);
             } else {
-                alert("Hatalı Kod! Kabul edilmedi. (Kod: S-Studio olmalıdır)");
+                alert("Hatalı Kod! Giriş kabul edilmedi. (Özel Yetkili Kodu: S-Studio olmalıdır)");
             }
         });
     }
 
-    // Öğretmen Kodu Oluşturma İşlemi (Maksimum 3 Hakkı Var)
+    // Öğretmen Kodu Oluşturma İşlemi (Maksimum 3 Kullanım)
     const generateTeacherCodeBtn = document.getElementById('generateTeacherCodeBtn');
     if (generateTeacherCodeBtn) {
         generateTeacherCodeBtn.addEventListener('click', () => {
             if (teacherCodeCount >= 3) {
-                alert("Çok fazla kullandın!");
+                alert("Çok fazla kullandın! Daha fazla kod oluşturamazsın.");
                 return;
             }
 
             teacherCodeCount++;
             
-            // Rastgele MC Öğretmen Kodu Üret
+            // Rastgele Öğretmen Kodu Üretimi
             const randomCode = 'MC-TEACHER-' + Math.random().toString(36).substring(2, 8).toUpperCase();
             
             document.getElementById('teacherCodeDisplay').textContent = randomCode;
             document.getElementById('generatedCodeContainer').style.display = 'block';
             document.getElementById('remainingAttemptsText').textContent = (3 - teacherCodeCount);
 
-            alert(`Öğretmen Kodu Başarıyla Oluşturuldu!\nKodunuz: ${randomCode}\nKalan Hakkınız: ${3 - teacherCodeCount}`);
+            alert(`Öğretmen Kodu Oluşturuldu!\nKod: ${randomCode}\nKalan Hakkınız: ${3 - teacherCodeCount}`);
 
             if (teacherCodeCount === 3) {
                 generateTeacherCodeBtn.disabled = true;
                 generateTeacherCodeBtn.style.opacity = '0.5';
-                generateTeacherCodeBtn.textContent = 'Limit Dolduruldu (3/3)';
+                generateTeacherCodeBtn.textContent = 'Çok fazla kullandın (3/3)';
             }
         });
     }
