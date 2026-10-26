@@ -123,7 +123,7 @@
             z-index: 1100;
         }
 
-        .user-dropdown a, .user-dropdown button {
+        .user-dropdown button {
             display: block;
             width: 100%;
             padding: 8px 12px;
@@ -138,8 +138,8 @@
             transition: background 0.2s;
         }
 
-        .user-dropdown a:hover { background: rgba(255,255,255,0.1); color: var(--primary); }
-        .user-dropdown button:hover { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        .user-dropdown button:hover { background: rgba(255,255,255,0.1); color: var(--primary); }
+        .user-dropdown button#logoutBtn:hover { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
 
         .hero {
             max-width: 1200px;
@@ -278,19 +278,19 @@
             <div class="auth-btns" id="authButtons">
                 <!-- Giriş yapılmadığında gözükecek butonlar -->
                 <div id="guestGroup" style="display: flex; gap: 10px;">
-                    <button class="btn btn-secondary" onclick="openModal('loginModal')">Giriş Yap</button>
-                    <button class="btn btn-primary" onclick="openModal('registerModal')">Kayıt Ol</button>
+                    <button type="button" class="btn btn-secondary" onclick="openModal('loginModal')">Giriş Yap</button>
+                    <button type="button" class="btn btn-primary" onclick="openModal('registerModal')">Kayıt Ol</button>
                 </div>
 
                 <!-- Giriş yapıldığında gözükecek Profil Butonu ve Menü -->
                 <div id="userGroup" style="display: none; position: relative;">
-                    <button class="btn btn-secondary" id="userMenuBtn">
+                    <button type="button" class="btn btn-secondary" id="userMenuBtn">
                         <i class="fa-solid fa-user"></i> <span id="userEmailText">Kullanıcı</span> <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
                     </button>
                     <div class="user-dropdown" id="userDropdown">
-                        <a href="#" onclick="openModal('profileModal'); return false;"><i class="fa-solid fa-id-card"></i> Kişisel Bilgiler</a>
+                        <button type="button" onclick="openModal('profileModal')"><i class="fa-solid fa-id-card"></i> Kişisel Bilgiler</button>
                         <hr style="border: 0.5px solid var(--card-border); margin: 5px 0;">
-                        <button id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
+                        <button type="button" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
                     </div>
                 </div>
             </div>
@@ -304,7 +304,7 @@
             <i class="fa-solid fa-server" style="color: var(--primary);"></i>
             <span>SUNUCU IP:</span>
             <span class="ip-text">ÇOK YAKINDA!</span>
-            <button class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyIP()">Kopyala</button>
+            <button type="button" class="btn btn-secondary" style="padding: 4px 10px; font-size: 0.8rem;" onclick="copyIP()">Kopyala</button>
         </div>
     </div>
 
@@ -339,7 +339,7 @@
                     <div style="color:var(--text-muted); margin-bottom:1.5rem;">Süre: 1 Ay</div>
                     <p style="text-align:left; font-size:0.95rem;">• 10 Kişilik Özel Çalışma Odası<br>• Grup derslerine öncelik</p>
                 </div>
-                <button class="btn btn-primary buy-action-btn" style="width:100%; margin-top:20px;">İncele</button>
+                <button type="button" class="btn btn-primary buy-action-btn" style="width:100%; margin-top:20px;">İncele</button>
             </div>
             <div class="vip-card popular">
                 <div class="badge">En Popüler</div>
@@ -349,7 +349,7 @@
                     <div style="color:var(--text-muted); margin-bottom:1.5rem;">Süre: 2 Ay</div>
                     <p style="text-align:left; font-size:0.95rem;">• 1 Kişilik Birebir Ders Odası<br>• Sınırsız Ders Tekrarı</p>
                 </div>
-                <button class="btn btn-primary buy-action-btn" style="width:100%; margin-top:20px;">İncele</button>
+                <button type="button" class="btn btn-primary buy-action-btn" style="width:100%; margin-top:20px;">İncele</button>
             </div>
         </div>
     </section>
@@ -418,7 +418,7 @@
     <script src="app.js"></script>
 
     <script>
-        // Sikke Paketlerini Oluşturma (20 adet, katlanarak giden)
+        // Sikke Paketlerini Dinamik Oluşturma
         const coinsContainer = document.getElementById('coinsContainer');
         let initialCoins = 100;
         let initialPrice = 20;
@@ -430,14 +430,18 @@
                 <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">Paket #${i}</div>
                 <div style="font-weight:700; font-size:1.1rem; color:var(--primary); margin:8px 0;">${initialCoins.toLocaleString('tr-TR')} Sikke</div>
                 <div style="font-size:1.2rem; font-weight:700;">${initialPrice.toLocaleString('tr-TR')} TL</div>
-                <button class="btn btn-secondary buy-action-btn" style="width: 100%; margin-top: 10px; font-size: 0.8rem;">Satın Al</button>
+                <button type="button" class="btn btn-secondary buy-action-btn" style="width: 100%; margin-top: 10px; font-size: 0.8rem;">Satın Al</button>
             `;
             coinsContainer.appendChild(card);
             initialCoins *= 2;
             initialPrice *= 2;
         }
 
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function openModal(id) { 
+            const userDropdown = document.getElementById('userDropdown');
+            if(userDropdown) userDropdown.style.display = 'none';
+            document.getElementById(id).style.display = 'flex'; 
+        }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
         window.onclick = function(e) { if (e.target.classList.contains('modal')) e.target.style.display = 'none'; }
         function copyIP() { navigator.clipboard.writeText("ÇOK YAKINDA!"); alert("IP henüz belli değil!"); }
