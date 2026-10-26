@@ -87,6 +87,7 @@
             display: flex;
             gap: 10px;
             align-items: center;
+            position: relative;
         }
 
         .btn {
@@ -106,6 +107,39 @@
         .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
         .btn-secondary { background: rgba(255, 255, 255, 0.1); color: var(--text-light); border: 1px solid var(--card-border); }
         .btn-secondary:hover { background: rgba(255, 255, 255, 0.2); }
+
+        /* Profil Açılır Menü Stilleri */
+        .user-dropdown {
+            display: none;
+            position: absolute;
+            top: 110%;
+            right: 0;
+            background: #1e293b;
+            border: 1px solid var(--card-border);
+            border-radius: 12px;
+            padding: 10px;
+            min-width: 180px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 1100;
+        }
+
+        .user-dropdown a, .user-dropdown button {
+            display: block;
+            width: 100%;
+            padding: 8px 12px;
+            color: var(--text-light);
+            text-decoration: none;
+            font-size: 0.9rem;
+            border-radius: 6px;
+            text-align: left;
+            background: none;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .user-dropdown a:hover { background: rgba(255,255,255,0.1); color: var(--primary); }
+        .user-dropdown button:hover { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
 
         .hero {
             max-width: 1200px;
@@ -216,8 +250,8 @@
 
         .form-group { margin-bottom: 1.2rem; }
         .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--text-muted); }
-        .form-group input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.6); color: #fff; outline: none; }
-        .form-group input:focus { border-color: var(--primary); }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.6); color: #fff; outline: none; }
+        .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
 
         footer { border-top: 1px solid var(--card-border); padding: 2rem; text-align: center; color: var(--text-muted); margin-top: 4rem; }
 
@@ -239,9 +273,26 @@
                 <li><a href="#vip">VIP Üyelikler</a></li>
                 <li><a href="#coins">Aegor Sikkeleri</a></li>
             </ul>
+            
+            <!-- Sağ Üst Giriş / Profil Alanı -->
             <div class="auth-btns" id="authButtons">
-                <button class="btn btn-secondary" onclick="openModal('loginModal')">Giriş Yap</button>
-                <button class="btn btn-primary" onclick="openModal('registerModal')">Kayıt Ol</button>
+                <!-- Giriş yapılmadığında gözükecek butonlar -->
+                <div id="guestGroup" style="display: flex; gap: 10px;">
+                    <button class="btn btn-secondary" onclick="openModal('loginModal')">Giriş Yap</button>
+                    <button class="btn btn-primary" onclick="openModal('registerModal')">Kayıt Ol</button>
+                </div>
+
+                <!-- Giriş yapıldığında gözükecek Profil Butonu ve Menü -->
+                <div id="userGroup" style="display: none; position: relative;">
+                    <button class="btn btn-secondary" id="userMenuBtn">
+                        <i class="fa-solid fa-user"></i> <span id="userEmailText">Kullanıcı</span> <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
+                    </button>
+                    <div class="user-dropdown" id="userDropdown">
+                        <a href="#" onclick="openModal('profileModal'); return false;"><i class="fa-solid fa-id-card"></i> Kişisel Bilgiler</a>
+                        <hr style="border: 0.5px solid var(--card-border); margin: 5px 0;">
+                        <button id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
+                    </div>
+                </div>
             </div>
         </div>
     </header>
@@ -288,7 +339,7 @@
                     <div style="color:var(--text-muted); margin-bottom:1.5rem;">Süre: 1 Ay</div>
                     <p style="text-align:left; font-size:0.95rem;">• 10 Kişilik Özel Çalışma Odası<br>• Grup derslerine öncelik</p>
                 </div>
-                <button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="alert('Giriş yapmalısınız!')">İncele</button>
+                <button class="btn btn-primary buy-action-btn" style="width:100%; margin-top:20px;">İncele</button>
             </div>
             <div class="vip-card popular">
                 <div class="badge">En Popüler</div>
@@ -298,7 +349,7 @@
                     <div style="color:var(--text-muted); margin-bottom:1.5rem;">Süre: 2 Ay</div>
                     <p style="text-align:left; font-size:0.95rem;">• 1 Kişilik Birebir Ders Odası<br>• Sınırsız Ders Tekrarı</p>
                 </div>
-                <button class="btn btn-primary" style="width:100%; margin-top:20px;" onclick="alert('Giriş yapmalısınız!')">İncele</button>
+                <button class="btn btn-primary buy-action-btn" style="width:100%; margin-top:20px;">İncele</button>
             </div>
         </div>
     </section>
@@ -334,10 +385,38 @@
         </div>
     </div>
 
+    <!-- Kişisel Bilgiler Modalı -->
+    <div id="profileModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('profileModal')">&times;</span>
+            <h3 style="margin-bottom: 1.5rem; text-align: center; font-family: 'Fredoka';">Kişisel Bilgiler</h3>
+            <form id="profileForm">
+                <div class="form-group"><label>İsim</label><input type="text" id="profileName" required placeholder="İsminiz"></div>
+                <div class="form-group"><label>Soyisim</label><input type="text" id="profileSurname" required placeholder="Soyisminiz"></div>
+                <div class="form-group"><label>Minecraft İsmi (IGN)</label><input type="text" id="profileMcName" required placeholder="Oyundaki Adınız"></div>
+                <div class="form-group">
+                    <label>Sınıfınız</label>
+                    <select id="profileClass" required>
+                        <option value="5">5. Sınıf</option>
+                        <option value="6">6. Sınıf</option>
+                        <option value="7">7. Sınıf</option>
+                        <option value="8">8. Sınıf</option>
+                        <option value="9">9. Sınıf</option>
+                        <option value="10">10. Sınıf</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Bilgileri Kaydet</button>
+            </form>
+        </div>
+    </div>
+
     <footer><p>&copy; 2026 Project Aegor - Tüm Hakları Saklıdır.</p></footer>
 
-    <!-- Firebase SDK ve Mantık Dosyası -->
-    <script type="module" src="app.js"></script>
+    <!-- Supabase CDN SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- Ana Mantık Dosyası -->
+    <script src="app.js"></script>
+
     <script>
         // Sikke Paketlerini Oluşturma (20 adet, katlanarak giden)
         const coinsContainer = document.getElementById('coinsContainer');
@@ -351,7 +430,7 @@
                 <div style="font-size: 0.85rem; color: var(--text-muted); margin-top: 5px;">Paket #${i}</div>
                 <div style="font-weight:700; font-size:1.1rem; color:var(--primary); margin:8px 0;">${initialCoins.toLocaleString('tr-TR')} Sikke</div>
                 <div style="font-size:1.2rem; font-weight:700;">${initialPrice.toLocaleString('tr-TR')} TL</div>
-                <button class="btn btn-secondary" style="width: 100%; margin-top: 10px; font-size: 0.8rem;" onclick="alert('Satın alımlar çok yakında!')">Satın Al</button>
+                <button class="btn btn-secondary buy-action-btn" style="width: 100%; margin-top: 10px; font-size: 0.8rem;">Satın Al</button>
             `;
             coinsContainer.appendChild(card);
             initialCoins *= 2;
