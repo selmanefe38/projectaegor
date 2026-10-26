@@ -4,7 +4,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let teacherCodeCount = 0; // Maksimum 3 kullanım takibi
+let teacherCodeCount = 0; // Max 3 kod üretme hakkı
 
 // Arayüzü Kullanıcı Oturumuna Göre Güncelleme
 async function syncUserUI() {
@@ -12,23 +12,19 @@ async function syncUserUI() {
         const { data: { session } } = await db.auth.getSession();
         const guestGroup = document.getElementById('guestGroup');
         const userGroup = document.getElementById('userGroup');
-        const userEmailText = document.getElementById('userEmailText');
-        const welcomeTextContainer = document.getElementById('welcomeTextContainer');
+        const userWelcomeText = document.getElementById('userWelcomeText');
 
         if (session && session.user) {
             if (guestGroup) guestGroup.style.display = 'none';
             if (userGroup) userGroup.style.display = 'block';
 
-            // Kullanıcının profil ismini veritabanından getir ve YEŞİL olarak göster
+            // Kullanıcının adını veritabanından getir
             const { data: profile } = await db.from('profiles').select('first_name').eq('id', session.user.id).single();
             
             if (profile && profile.first_name) {
-                const nameText = `HOŞ GELDİNİZ, ${profile.first_name.toUpperCase()}!`;
-                if (userEmailText) userEmailText.textContent = nameText;
-                if (welcomeTextContainer) welcomeTextContainer.textContent = nameText;
+                if (userWelcomeText) userWelcomeText.textContent = `HOŞ GELDİNİZ ${profile.first_name.toUpperCase()}`;
             } else {
-                if (userEmailText) userEmailText.textContent = `HOŞ GELDİNİZ!`;
-                if (welcomeTextContainer) welcomeTextContainer.textContent = `HOŞ GELDİNİZ!`;
+                if (userWelcomeText) userWelcomeText.textContent = `HOŞ GELDİNİZ!`;
             }
         } else {
             if (guestGroup) guestGroup.style.display = 'flex';
@@ -39,21 +35,6 @@ async function syncUserUI() {
     }
 }
 
-// Profil Bilgilerini Form İçi Yükleme
-async function loadUserProfile() {
-    const { data: { session } } = await db.auth.getSession();
-    if (!session) return;
-
-    const { data } = await db.from('profiles').select('*').eq('id', session.user.id).single();
-
-    if (data) {
-        if(document.getElementById('profileName')) document.getElementById('profileName').value = data.first_name || '';
-        if(document.getElementById('profileSurname')) document.getElementById('profileSurname').value = data.last_name || '';
-        if(document.getElementById('profileMcName')) document.getElementById('profileMcName').value = data.mc_ign || '';
-        if(document.getElementById('profileClass')) document.getElementById('profileClass').value = data.grade || '5';
-    }
-}
-
 document.addEventListener('DOMContentLoaded', async () => {
     await syncUserUI();
 
@@ -61,7 +42,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await syncUserUI();
     });
 
-    // Giriş Yap
+    // 1. Giriş Yap
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -75,83 +56,59 @@ document.addEventListener('DOMContentLoaded', async () => {
                 alert("Giriş Hatası: " + error.message);
             } else {
                 alert("Giriş Başarılı! Hoş Geldin.");
-                closeModal('loginModal');
+                closeModal('authModal');
                 await syncUserUI();
             }
         });
     }
 
-    // Kayıt Ol
+    // 2. Kayıt Ol (Tek Seferde Tüm Bilgileri Veritabanına Kaydeder)
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('registerEmail').value.trim();
-            const password = document.getElementById('registerPassword').value;
+            const firstName = document.getElementById('regName').value.trim();
+            const lastName = document.getElementById('regSurname').value.trim();
+            const mcIgn = document.getElementById('regMcName').value.trim();
+            const grade = document.getElementById('regClass').value;
+            const email = document.getElementById('regEmail').value.trim();
+            const password = document.getElementById('regPassword').value;
 
-            const { error } = await db.auth.signUp({ email, password });
+            // Supabase Üyelik Aç
+            const { data, error } = await db.auth.signUp({ email, password });
 
             if (error) {
                 alert("Kayıt Hatası: " + error.message);
             } else {
-                alert("Kayıt Başarılı! Hesabınız oluşturuldu.");
-                closeModal('registerModal');
-            }
-        });
-    }
+                // Hesaba özel veritabanına kaydet
+                if (data.user) {
+                    await db.from('profiles').upsert({
+                        id: data.user.id,
+                        first_name: firstName,
+                        last_name: lastName,
+                        mc_ign: mcIgn,
+                        grade: grade,
+                        updated_at: new Date()
+                    });
+                }
 
-    // Kişisel Bilgileri Hesaba Kaydetme & Anında Yeşil İsim Güncelleme
-    const saveProfileDirectBtn = document.getElementById('saveProfileDirectBtn');
-    if (saveProfileDirectBtn) {
-        saveProfileDirectBtn.addEventListener('click', async () => {
-            const { data: { session } } = await db.auth.getSession();
-            
-            if (!session) {
-                alert("Lütfen önce giriş yapın!");
-                return;
-            }
-
-            const firstName = document.getElementById('profileName').value.trim();
-            const lastName = document.getElementById('profileSurname').value.trim();
-            const mcIgn = document.getElementById('profileMcName').value.trim();
-            const grade = document.getElementById('profileClass').value;
-
-            if (!firstName || !lastName || !mcIgn) {
-                alert("Lütfen tüm alanları doldurun!");
-                return;
-            }
-
-            const { error } = await db.from('profiles').upsert({
-                id: session.user.id,
-                first_name: firstName,
-                last_name: lastName,
-                mc_ign: mcIgn,
-                grade: grade,
-                updated_at: new Date()
-            });
-
-            if (error) {
-                alert("Profil Kaydedilemedi: " + error.message);
-            } else {
-                alert("Kişisel bilgileriniz hesabınıza başarıyla kaydedildi!");
-                closeModal('profileModal');
-                
-                // Sağ üstteki yazıyı anında yeşil yap ve ismi güncelle
+                alert("Kayıt Başarılı!");
+                closeModal('authModal');
                 await syncUserUI();
                 
-                // Anında "Yetkili Misiniz?" penceresini aç
+                // Kayıttan hemen sonra Kod Sorma Ekranını Aç
                 openModal('authQuestionModal');
             }
         });
     }
 
-    // "Yetkili Misiniz?" - "Evet" Butonu
+    // 3. "Yetkili Misiniz?" - "Evet" Butonu
     const authYesBtn = document.getElementById('authYesBtn');
     if (authYesBtn) {
         authYesBtn.addEventListener('click', () => {
             closeModal('authQuestionModal');
             
-            // Kutunun içini tamamen temizle ki şifre belli olmasın
+            // Kod giriş kutusunu tamamen temizle
             const codeInput = document.getElementById('authorizedCodeInput');
             if(codeInput) codeInput.value = '';
 
@@ -159,16 +116,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // "Yetkili Misiniz?" - "Hayır" Butonu
+    // 4. "Yetkili Misiniz?" - "Hayır" Butonu
     const authNoBtn = document.getElementById('authNoBtn');
     if (authNoBtn) {
         authNoBtn.addEventListener('click', () => {
             closeModal('authQuestionModal');
-            alert("Kayıt işleminiz tamamlandı. İyi oyunlar dileriz!");
+            alert("İşleminiz tamamlandı. İyi oyunlar dileriz!");
         });
     }
 
-    // Yetkili Kodu Doğrulama (S-Studio)
+    // 5. Yetkili Kodu Doğrulama (S-Studio Kontrolü)
     const submitAuthCodeBtn = document.getElementById('submitAuthCodeBtn');
     if (submitAuthCodeBtn) {
         submitAuthCodeBtn.addEventListener('click', () => {
@@ -183,12 +140,12 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 openModal('teacherPanelModal');
             } else {
-                alert("Hatalı Kod! Giriş kabul edilmedi. (Özel Yetkili Kodu yanlış)");
+                alert("Hatalı Kod! Giriş kabul edilmedi.");
             }
         });
     }
 
-    // Öğretmen Kodu Oluşturma (Max 3 Kullanım)
+    // 6. Öğretmen Kodu Oluşturma (Max 3 Hakkı Var)
     const generateTeacherCodeBtn = document.getElementById('generateTeacherCodeBtn');
     if (generateTeacherCodeBtn) {
         generateTeacherCodeBtn.addEventListener('click', () => {
@@ -214,15 +171,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Menü Butonları
-    const openProfileModalBtn = document.getElementById('openProfileModalBtn');
-    if (openProfileModalBtn) {
-        openProfileModalBtn.addEventListener('click', async () => {
-            await loadUserProfile();
-            openModal('profileModal');
-        });
-    }
-
+    // Menü Öğretmen Paneli Butonu
     const openTeacherPanelBtn = document.getElementById('openTeacherPanelBtn');
     if (openTeacherPanelBtn) {
         openTeacherPanelBtn.addEventListener('click', () => {
@@ -242,7 +191,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Profil Menüsü Açma / Kapama
+    // Profil Açılır Menüsü
     const userMenuBtn = document.getElementById('userMenuBtn');
     const userDropdown = document.getElementById('userDropdown');
     if (userMenuBtn && userDropdown) {
