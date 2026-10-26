@@ -4,7 +4,7 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-let teacherCodeCount = 0; // Max 3 kod üretme hakkı
+let teacherCodeCount = 0; // Maksimum 3 kullanım takibi
 
 // Arayüzü Kullanıcı Oturumuna Göre Güncelleme
 async function syncUserUI() {
@@ -22,7 +22,7 @@ async function syncUserUI() {
             const { data: profile } = await db.from('profiles').select('first_name').eq('id', session.user.id).single();
             
             if (profile && profile.first_name) {
-                if (userWelcomeText) userWelcomeText.textContent = `HOŞ GELDİNİZ ${profile.first_name.toUpperCase()}`;
+                if (userWelcomeText) userWelcomeText.textContent = `HOŞ GELDİNİZ, ${profile.first_name.toUpperCase()}`;
             } else {
                 if (userWelcomeText) userWelcomeText.textContent = `HOŞ GELDİNİZ!`;
             }
@@ -62,7 +62,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 2. Kayıt Ol (Tek Seferde Tüm Bilgileri Veritabanına Kaydeder)
+    // 2. Kayıt Ol (Tüm Bilgileri Veritabanına Kaydeder)
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 closeModal('authModal');
                 await syncUserUI();
                 
-                // Kayıttan hemen sonra Kod Sorma Ekranını Aç
+                // Kayıttan hemen sonra Yetkili Sorma Ekranını Aç
                 openModal('authQuestionModal');
             }
         });
