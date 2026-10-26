@@ -18,14 +18,17 @@ async function syncUserUI() {
         if (session && session.user) {
             if (guestGroup) guestGroup.style.display = 'none';
             if (userGroup) userGroup.style.display = 'block';
-            if (userEmailText) userEmailText.textContent = session.user.email;
 
-            // Kullanıcının profil ismini veritabanından getir
+            // Kullanıcının profil ismini veritabanından getir ve YEŞİL olarak göster
             const { data: profile } = await db.from('profiles').select('first_name').eq('id', session.user.id).single();
-            if (profile && profile.first_name && welcomeTextContainer) {
-                welcomeTextContainer.textContent = `HOŞ GELDİNİZ, ${profile.first_name.toUpperCase()}!`;
-            } else if (welcomeTextContainer) {
-                welcomeTextContainer.textContent = `HOŞ GELDİNİZ!`;
+            
+            if (profile && profile.first_name) {
+                const nameText = `HOŞ GELDİNİZ, ${profile.first_name.toUpperCase()}!`;
+                if (userEmailText) userEmailText.textContent = nameText;
+                if (welcomeTextContainer) welcomeTextContainer.textContent = nameText;
+            } else {
+                if (userEmailText) userEmailText.textContent = `HOŞ GELDİNİZ!`;
+                if (welcomeTextContainer) welcomeTextContainer.textContent = `HOŞ GELDİNİZ!`;
             }
         } else {
             if (guestGroup) guestGroup.style.display = 'flex';
@@ -97,7 +100,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Kişisel Bilgileri Hesaba Kaydetme - DOĞRUDAN BUTON TIKLAMASI (Kesin Çözüm)
+    // Kişisel Bilgileri Hesaba Kaydetme & Anında Yeşil İsim Güncelleme
     const saveProfileDirectBtn = document.getElementById('saveProfileDirectBtn');
     if (saveProfileDirectBtn) {
         saveProfileDirectBtn.addEventListener('click', async () => {
@@ -132,6 +135,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 alert("Kişisel bilgileriniz hesabınıza başarıyla kaydedildi!");
                 closeModal('profileModal');
+                
+                // Sağ üstteki yazıyı anında yeşil yap ve ismi güncelle
                 await syncUserUI();
                 
                 // Anında "Yetkili Misiniz?" penceresini aç
@@ -145,6 +150,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (authYesBtn) {
         authYesBtn.addEventListener('click', () => {
             closeModal('authQuestionModal');
+            
+            // Kutunun içini tamamen temizle ki şifre belli olmasın
+            const codeInput = document.getElementById('authorizedCodeInput');
+            if(codeInput) codeInput.value = '';
+
             openModal('authCodeModal');
         });
     }
@@ -173,7 +183,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 openModal('teacherPanelModal');
             } else {
-                alert("Hatalı Kod! Giriş kabul edilmedi. (Özel Yetkili Kodu: S-Studio)");
+                alert("Hatalı Kod! Giriş kabul edilmedi. (Özel Yetkili Kodu yanlış)");
             }
         });
     }
