@@ -13,11 +13,20 @@ async function syncUserUI() {
         const guestGroup = document.getElementById('guestGroup');
         const userGroup = document.getElementById('userGroup');
         const userEmailText = document.getElementById('userEmailText');
+        const welcomeTextContainer = document.getElementById('welcomeTextContainer');
 
         if (session && session.user) {
             if (guestGroup) guestGroup.style.display = 'none';
             if (userGroup) userGroup.style.display = 'block';
             if (userEmailText) userEmailText.textContent = session.user.email;
+
+            // Kullanıcının profil ismini veritabanından getir
+            const { data: profile } = await db.from('profiles').select('first_name').eq('id', session.user.id).single();
+            if (profile && profile.first_name && welcomeTextContainer) {
+                welcomeTextContainer.textContent = `HOŞ GELDİNİZ, ${profile.first_name.toUpperCase()}!`;
+            } else if (welcomeTextContainer) {
+                welcomeTextContainer.textContent = `HOŞ GELDİNİZ!`;
+            }
         } else {
             if (guestGroup) guestGroup.style.display = 'flex';
             if (userGroup) userGroup.style.display = 'none';
@@ -27,16 +36,12 @@ async function syncUserUI() {
     }
 }
 
-// Profil Bilgilerini Yükleme
+// Profil Bilgilerini Form İçi Yükleme
 async function loadUserProfile() {
     const { data: { session } } = await db.auth.getSession();
     if (!session) return;
 
-    const { data, error } = await db
-        .from('profiles')
-        .select('*')
-        .eq('id', session.user.id)
-        .single();
+    const { data } = await db.from('profiles').select('*').eq('id', session.user.id).single();
 
     if (data) {
         if(document.getElementById('profileName')) document.getElementById('profileName').value = data.first_name || '';
@@ -53,7 +58,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await syncUserUI();
     });
 
-    // Giriş Yap Formu
+    // Giriş Yap
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -61,7 +66,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
 
-            const { data, error } = await db.auth.signInWithPassword({ email, password });
+            const { error } = await db.auth.signInWithPassword({ email, password });
 
             if (error) {
                 alert("Giriş Hatası: " + error.message);
@@ -73,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Kayıt Ol Formu
+    // Kayıt Ol
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
@@ -81,22 +86,21 @@ document.addEventListener('DOMContentLoaded', async () => {
             const email = document.getElementById('registerEmail').value.trim();
             const password = document.getElementById('registerPassword').value;
 
-            const { data, error } = await db.auth.signUp({ email, password });
+            const { error } = await db.auth.signUp({ email, password });
 
             if (error) {
                 alert("Kayıt Hatası: " + error.message);
             } else {
-                alert("Kayıt Başarılı! E-postanızı doğruladıktan sonra giriş yapabilirsiniz.");
+                alert("Kayıt Başarılı! Hesabınız oluşturuldu.");
                 closeModal('registerModal');
             }
         });
     }
 
-    // Kişisel Bilgileri Hesaba Kaydetme & Doğrudan Kod Sorma Akışı
-    const profileForm = document.getElementById('profileForm');
-    if (profileForm) {
-        profileForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+    // Kişisel Bilgileri Hesaba Kaydetme - DOĞRUDAN BUTON TIKLAMASI (Kesin Çözüm)
+    const saveProfileDirectBtn = document.getElementById('saveProfileDirectBtn');
+    if (saveProfileDirectBtn) {
+        saveProfileDirectBtn.addEventListener('click', async () => {
             const { data: { session } } = await db.auth.getSession();
             
             if (!session) {
@@ -108,6 +112,11 @@ document.addEventListener('DOMContentLoaded', async () => {
             const lastName = document.getElementById('profileSurname').value.trim();
             const mcIgn = document.getElementById('profileMcName').value.trim();
             const grade = document.getElementById('profileClass').value;
+
+            if (!firstName || !lastName || !mcIgn) {
+                alert("Lütfen tüm alanları doldurun!");
+                return;
+            }
 
             const { error } = await db.from('profiles').upsert({
                 id: session.user.id,
@@ -121,13 +130,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (error) {
                 alert("Profil Kaydedilemedi: " + error.message);
             } else {
-                alert("Profil Bilgileriniz Hesabınıza Başarıyla Kaydedildi!");
+                alert("Kişisel bilgileriniz hesabınıza başarıyla kaydedildi!");
                 closeModal('profileModal');
+                await syncUserUI();
                 
-                // Kaydettikten hemen sonra "Yetkili Misiniz?" penceresini açıyoruz
-                setTimeout(() => {
-                    openModal('authQuestionModal');
-                }, 300);
+                // Anında "Yetkili Misiniz?" penceresini aç
+                openModal('authQuestionModal');
             }
         });
     }
@@ -137,9 +145,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (authYesBtn) {
         authYesBtn.addEventListener('click', () => {
             closeModal('authQuestionModal');
-            setTimeout(() => {
-                openModal('authCodeModal');
-            }, 300);
+            openModal('authCodeModal');
         });
     }
 
@@ -152,7 +158,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Yetkili Kodu Doğrulama Butonu (S-Studio Kontrolü)
+    // Yetkili Kodu Doğrulama (S-Studio)
     const submitAuthCodeBtn = document.getElementById('submitAuthCodeBtn');
     if (submitAuthCodeBtn) {
         submitAuthCodeBtn.addEventListener('click', () => {
@@ -162,20 +168,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 alert("Yetkili Kodu Doğrulandı! Öğretmen Kodu Sayfanız Açıldı.");
                 closeModal('authCodeModal');
                 
-                // Sağ üst menüde Öğretmen Kod Sayfası butonunu aktif yap
                 const openTeacherPanelBtn = document.getElementById('openTeacherPanelBtn');
                 if (openTeacherPanelBtn) openTeacherPanelBtn.style.display = 'block';
 
-                setTimeout(() => {
-                    openModal('teacherPanelModal');
-                }, 300);
+                openModal('teacherPanelModal');
             } else {
-                alert("Hatalı Kod! Giriş kabul edilmedi. (Özel Yetkili Kodu: S-Studio olmalıdır)");
+                alert("Hatalı Kod! Giriş kabul edilmedi. (Özel Yetkili Kodu: S-Studio)");
             }
         });
     }
 
-    // Öğretmen Kodu Oluşturma İşlemi (Maksimum 3 Kullanım)
+    // Öğretmen Kodu Oluşturma (Max 3 Kullanım)
     const generateTeacherCodeBtn = document.getElementById('generateTeacherCodeBtn');
     if (generateTeacherCodeBtn) {
         generateTeacherCodeBtn.addEventListener('click', () => {
@@ -185,8 +188,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
 
             teacherCodeCount++;
-            
-            // Rastgele Öğretmen Kodu Üretimi
             const randomCode = 'MC-TEACHER-' + Math.random().toString(36).substring(2, 8).toUpperCase();
             
             document.getElementById('teacherCodeDisplay').textContent = randomCode;
@@ -203,7 +204,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Açılır Menüden Profil Aç
+    // Menü Butonları
     const openProfileModalBtn = document.getElementById('openProfileModalBtn');
     if (openProfileModalBtn) {
         openProfileModalBtn.addEventListener('click', async () => {
@@ -212,7 +213,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Açılır Menüden Öğretmen Paneli Aç
     const openTeacherPanelBtn = document.getElementById('openTeacherPanelBtn');
     if (openTeacherPanelBtn) {
         openTeacherPanelBtn.addEventListener('click', () => {
@@ -247,7 +247,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Mağaza / VIP / Sikke Tıklama Uyarısı (Samet Mesajı)
+// VIP / Sikke Satın Alma Uyarısı (Samet Mesajı)
 document.addEventListener('click', async (e) => {
     const target = e.target.closest('.buy-action-btn');
     if (!target) return;
