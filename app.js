@@ -4,17 +4,33 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Sayfa yüklendiğinde oturumu kontrol et
+// Arayüzü Giriş Durumuna Göre Değiştiren Ana Fonksiyon
+async function syncUserUI() {
     const { data: { session } } = await supabase.auth.getSession();
-    updateAuthUI(session);
+    const guestGroup = document.getElementById('guestGroup');
+    const userGroup = document.getElementById('userGroup');
+    const userEmailText = document.getElementById('userEmailText');
 
-    // 2. Anlık Oturum Değişikliklerini Dinle (Giriş / Çıkışta anında UI güncellenir)
-    supabase.auth.onAuthStateChange((event, session) => {
-        updateAuthUI(session);
+    if (session && session.user) {
+        if (guestGroup) guestGroup.style.display = 'none';
+        if (userGroup) userGroup.style.display = 'block';
+        if (userEmailText) userEmailText.textContent = session.user.email;
+    } else {
+        if (guestGroup) guestGroup.style.display = 'flex';
+        if (userGroup) userGroup.style.display = 'none';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', async () => {
+    // 1. Sayfa Açılır Açılmaz Kullanıcı Oturumunu Kontrol Et
+    await syncUserUI();
+
+    // 2. Supabase Canlı Oturum Dinleyicisi (Giriş/Çıkış Anında Arayüzü Günceller)
+    supabase.auth.onAuthStateChange(async (event, session) => {
+        await syncUserUI();
     });
 
-    // 3. Giriş Yap Form Gönderimi
+    // 3. Giriş Yap Form İşlemi
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
@@ -27,13 +43,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             if (error) {
                 alert("Giriş Hatası: " + error.message);
             } else {
-                alert("Giriş Başarılı!");
+                alert("Giriş Başarılı! Hoş Geldin.");
                 closeModal('loginModal');
+                await syncUserUI();
             }
         });
     }
 
-    // 4. Kayıt Ol Form Gönderimi
+    // 4. Kayıt Ol Form İşlemi
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
@@ -52,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 5. Kişisel Bilgileri Kaydetme Formu
+    // 5. Kişisel Bilgileri Kaydetme Form İşlemi
     const profileForm = document.getElementById('profileForm');
     if (profileForm) {
         profileForm.addEventListener('submit', (e) => {
@@ -73,11 +90,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         logoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
             await supabase.auth.signOut();
-            window.location.reload();
+            await syncUserUI();
+            alert("Çıkış Yapıldı.");
         });
     }
 
-    // 7. Sağ Üst Profil Açılır Menüsü (Dropdown) Yönetimi
+    // 7. Sağ Üst Profil Menüsü Açma / Kapama
     const userMenuBtn = document.getElementById('userMenuBtn');
     const userDropdown = document.getElementById('userDropdown');
     if (userMenuBtn && userDropdown) {
@@ -92,24 +110,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Arayüzü oturum durumuna göre güncelleyen fonksiyon
-function updateAuthUI(session) {
-    const guestGroup = document.getElementById('guestGroup');
-    const userGroup = document.getElementById('userGroup');
-    const userEmailText = document.getElementById('userEmailText');
-
-    if (session && session.user) {
-        if (guestGroup) guestGroup.style.display = 'none';
-        if (userGroup) userGroup.style.display = 'block';
-        if (userEmailText) userEmailText.textContent = session.user.email;
-    } else {
-        if (guestGroup) guestGroup.style.display = 'flex';
-        if (userGroup) userGroup.style.display = 'none';
-    }
-}
-
-// Mağaza, VIP ve Sikke Paketlerindeki Butonların Ortak Kontrolü (Samet Uyarısı)
+// 8. VIP ve Sikke Butonlarına Tıklandığında Ekrana Gelecek O Efsane Uyarı
 document.addEventListener('click', async (e) => {
+    // Tıklanan eleman veya üst elemanlarında buy-action-btn var mı kontrol et
     const target = e.target.closest('.buy-action-btn');
     if (!target) return;
     
