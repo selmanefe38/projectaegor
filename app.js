@@ -1,19 +1,17 @@
-// Supabase Bağlantı Bilgileri
 const SUPABASE_URL = 'https://bkeckhwhakvrmgdifukg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZWNraHdoYWt2cm1nZGlmdWtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMTg2NDEsImV4cCI6MjEwODU5NDY0MX0.Y3n4B8g6K8Wr_HSxD4NH9Sc7bMlZkG-gcz_Q2DQSiNw';
 
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 document.addEventListener('DOMContentLoaded', async () => {
-    // 1. Mevcut Oturumu Kontrol Et
     await checkUserSession();
 
-    // 2. Giriş Yap Formu
+    // Giriş Yap İşlemi
     const loginForm = document.getElementById('loginForm');
     if (loginForm) {
         loginForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('loginEmail').value;
+            const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
 
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
@@ -28,12 +26,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 3. Kayıt Ol Formu
+    // Kayıt Ol İşlemi
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('registerEmail').value;
+            const email = document.getElementById('registerEmail').value.trim();
             const password = document.getElementById('registerPassword').value;
 
             const { data, error } = await supabase.auth.signUp({ email, password });
@@ -47,7 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 4. Profil Formu Kaydetme
+    // Profil Kaydetme
     const profileForm = document.getElementById('profileForm');
     if (profileForm) {
         profileForm.addEventListener('submit', (e) => {
@@ -62,7 +60,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 5. Çıkış Yap Butonu
+    // Çıkış Yap
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async (e) => {
@@ -72,7 +70,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 6. Profil Açılır Menüsü (Dropdown) Kontrolü
+    // Profil Menüsü Aç/Kapat
     const userMenuBtn = document.getElementById('userMenuBtn');
     const userDropdown = document.getElementById('userDropdown');
     if (userMenuBtn && userDropdown) {
@@ -87,7 +85,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// Kullanıcı Oturumunu Kontrol Eden ve Ekranı Düzenleyen Fonksiyon
 async function checkUserSession() {
     const { data: { session } } = await supabase.auth.getSession();
     const guestGroup = document.getElementById('guestGroup');
@@ -104,18 +101,19 @@ async function checkUserSession() {
     }
 }
 
-// Bütün Mağaza / VIP / Sikke Butonlarında Sayfa Kaymasını Önleyen ve Uyarısı Veren Mantık
+// Mağaza/VIP Buton Tıklama Kontrolü ve Samet Mesajı
 document.addEventListener('click', async (e) => {
-    if (e.target.classList.contains('buy-action-btn')) {
-        e.preventDefault();
-        e.stopPropagation();
+    const target = e.target.closest('.buy-action-btn');
+    if (!target) return;
+    
+    e.preventDefault();
+    e.stopPropagation();
 
-        const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await supabase.auth.getSession();
 
-        if (!session) {
-            alert("Giriş yapmalısınız!");
-        } else {
-            alert("Malesef çok yakında satın alımlar başlayacak (Samet dinen onay versin satın alımlar başlayacak)");
-        }
+    if (!session) {
+        alert("Giriş yapmalısınız!");
+    } else {
+        alert("Malesef çok yakında satın alımlar başlayacak (Samet dinen onay versin satın alımlar başlayacak)");
     }
 });
