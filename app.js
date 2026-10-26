@@ -1,71 +1,42 @@
-// Supabase SDK Bağlantısı (CDN üzerinden)
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
+// Supabase Bağlantısı
+const SUPABASE_URL = 'https://bkeckhwhakvrmgdifukg.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZWNraHdoYWt2cm1nZGlmdWtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMTg2NDEsImV4cCI6MjEwODU5NDY0MX0.Y3n4B8g6K8Wr_HSxD4NH9Sc7bMlZkG-gcz_Q2DQSiNw';
 
-// Senin Supabase Bilgilerin
-const SUPABASE_URL = "https://bkeckhwhakvrmgdifukg.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZWNraHdoYWt2cm1nZGlmdWtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMTg2NDEsImV4cCI6MjEwODU5NDY0MX0.Y3n4B8g6K8Wr_HSxD4NH9Sc7bMlZkG-gcz_Q2DQSiNw";
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-// Kayıt Ol Form İşlemi
-document.getElementById('registerForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('registerEmail').value;
-    const password = document.getElementById('registerPassword').value;
-
-    // Supabase Auth ile Kayıt Olma
-    const { data, error } = await supabase.auth.signUp({
-        email: email,
-        password: password,
-    });
-
-    if (error) {
-        alert("Kayıt Hatası: " + error.message);
-    } else {
-        alert("Kayıt başarılı! E-postanızı kontrol edin veya giriş yapın.");
-        document.getElementById('registerModal').style.display = 'none';
-    }
-});
-
-// Giriş Yap Form İşlemi
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const email = document.getElementById('loginEmail').value;
-    const password = document.getElementById('loginPassword').value;
-
-    // Supabase Auth ile Giriş Yapma
-    const { data, error } = await supabase.auth.signInWithPassword({
-        email: email,
-        password: password,
-    });
-
-    if (error) {
-        alert("Giriş Hatası: E-posta veya şifre hatalı!");
-    } else {
-        alert("Giriş başarılı! Hoş geldiniz.");
-        document.getElementById('loginModal').style.display = 'none';
-        checkUserSession();
-    }
-});
-
-// Oturum Kontrolü ve Arayüz Güncelleme
-async function checkUserSession() {
+// Sayfa yüklendiğinde çalışacak kontroller
+document.addEventListener('DOMContentLoaded', async () => {
+    // Mevcut oturumu kontrol et
     const { data: { session } } = await supabase.auth.getSession();
-    const authBtns = document.getElementById('authButtons');
+    
+    // Sağ üstteki e-posta alanını güncelle (varsa)
+    const userEmailDisplay = document.getElementById('user-email');
+    if (session && userEmailDisplay) {
+        userEmailDisplay.textContent = session.user.email;
+    }
 
-    if (session) {
-        const user = session.user;
-        authBtns.innerHTML = `
-            <span style="font-size:0.9rem; color:var(--primary);">${user.email}</span>
-            <button class="btn btn-secondary" id="logoutBtn" style="padding: 6px 12px; font-size: 0.85rem;">Çıkış</button>
-        `;
-        document.getElementById('logoutBtn').addEventListener('click', async () => {
+    // Çıkış yapma buton işlevi (varsa)
+    const logoutBtn = document.getElementById('logout-btn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
             await supabase.auth.signOut();
-            alert("Çıkış yapıldı.");
             window.location.reload();
         });
     }
-}
+});
 
-// Sayfa yüklendiğinde oturumu kontrol et
-checkUserSession();
+// Mağaza / VIP Paketleri Butonları Kontrolü
+document.querySelectorAll('.buy-btn, .incele-btn').forEach(button => {
+    button.addEventListener('click', async () => {
+        // Butona tıklandığı an güncel oturumu tekrar sorgula
+        const { data: { session } } = await supabase.auth.getSession();
+
+        if (!session) {
+            // Giriş yapılmamışsa uyar
+            alert("Giriş yapmalısınız!");
+        } else {
+            // Giriş yapılmışsa o efsane mesajı patlat
+            alert("Malesef çok yakında satın alımlar başlayacak (Samet dinen onay versin satın alımlar başlayacak)");
+        }
+    });
+});
