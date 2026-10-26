@@ -124,7 +124,6 @@
             background: rgba(255, 255, 255, 0.18); 
         }
 
-        /* Yeşil Onay Butonu */
         .btn-success {
             background: linear-gradient(135deg, #10b981, #059669);
             color: #fff;
@@ -133,6 +132,13 @@
         .btn-success:hover {
             transform: translateY(-2px);
             box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
+        }
+
+        /* Yeşil Parıldayan İsim / Hoş Geldiniz Efekti */
+        .green-welcome-text {
+            color: #10b981 !important;
+            font-weight: 700 !important;
+            text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
         }
 
         .user-dropdown {
@@ -310,19 +316,6 @@
             box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
         }
 
-        /* Yeşil Hoş Geldiniz Efekti */
-        .welcome-badge {
-            background: rgba(16, 185, 129, 0.15);
-            color: #10b981;
-            border: 1px solid #10b981;
-            padding: 4px 12px;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            font-weight: 600;
-            display: inline-block;
-            margin-bottom: 10px;
-        }
-
         footer { border-top: 1px solid var(--card-border); padding: 2rem; text-align: center; color: var(--text-muted); margin-top: 4rem; }
 
         @media (max-width: 768px) {
@@ -353,11 +346,11 @@
                 <div id="userGroup" style="display: none; position: relative;">
                     <button type="button" class="btn btn-secondary" id="userMenuBtn">
                         <i class="fa-solid fa-user-check" style="color: #10b981;"></i> 
-                        <span id="userEmailText">Kullanıcı</span> 
+                        <span id="userEmailText" class="green-welcome-text">HOŞ GELDİNİZ!</span> 
                         <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
                     </button>
                     <div class="user-dropdown" id="userDropdown">
-                        <div id="welcomeTextContainer" style="padding: 8px 12px; font-weight: 700; color: #10b981; font-size: 0.9rem; border-bottom: 1px solid var(--card-border);">
+                        <div id="welcomeTextContainer" class="green-welcome-text" style="padding: 8px 12px; font-size: 0.9rem; border-bottom: 1px solid var(--card-border);">
                             HOŞ GELDİNİZ!
                         </div>
                         <button type="button" id="openProfileModalBtn"><i class="fa-solid fa-id-card"></i> Kişisel Bilgiler</button>
@@ -489,7 +482,7 @@
             <i class="fa-solid fa-shield-halved" style="font-size: 3.5rem; color: #10b981; margin-bottom: 1rem;"></i>
             <h3 style="font-family: 'Fredoka'; font-size: 1.8rem; margin-bottom: 0.5rem; color: #10b981;">Bilgiler Kaydedildi!</h3>
             <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;">Yetkili misiniz?</p>
-            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Öğretmen yetkisi ve özel kod panelini açmak için yetkili doğrulamanız gerekir.</p>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Öğretmen yetkisi ve özel kod panelini açmak için yetkili doğrulamanız gerekmektedir.</p>
             <div style="display: flex; gap: 12px; justify-content: center;">
                 <button type="button" class="btn btn-success" id="authYesBtn" style="padding: 10px 30px;">Evet</button>
                 <button type="button" class="btn btn-secondary" id="authNoBtn" style="padding: 10px 30px;">Hayır</button>
@@ -497,7 +490,7 @@
         </div>
     </div>
 
-    <!-- Kod Doğrulama Modalı -->
+    <!-- Kod Doğrulama Modalı (Örnek Şifre Yazısı Kaldırıldı!) -->
     <div id="authCodeModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('authCodeModal')">&times;</span>
@@ -507,7 +500,7 @@
             <h3 style="margin-bottom: 1rem; text-align: center; font-family: 'Fredoka'; font-size: 1.6rem; color: var(--primary);">Yetkili Kodu Girişi</h3>
             <div class="form-group">
                 <label>Lütfen Özel Yetkili Kodunuzu Giriniz:</label>
-                <input type="password" id="authorizedCodeInput" placeholder="S-Studio">
+                <input type="password" id="authorizedCodeInput" placeholder="Yetkili kodunu giriniz...">
             </div>
             <button type="button" class="btn btn-primary" id="submitAuthCodeBtn" style="width: 100%; padding: 12px; margin-top: 5px;">Doğrula ve Giriş Yap</button>
         </div>
