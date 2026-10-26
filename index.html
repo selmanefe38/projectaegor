@@ -239,7 +239,7 @@
             padding: 2.5rem;
             border-radius: 20px;
             width: 90%;
-            max-width: 400px;
+            max-width: 420px;
             position: relative;
         }
 
@@ -251,6 +251,18 @@
         .form-group label { display: block; margin-bottom: 5px; font-size: 0.9rem; color: var(--text-muted); }
         .form-group input, .form-group select { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); background: rgba(15, 23, 42, 0.6); color: #fff; outline: none; }
         .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
+
+        .code-box {
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid var(--primary);
+            padding: 10px;
+            border-radius: 8px;
+            color: var(--primary);
+            font-family: monospace;
+            font-size: 1.1rem;
+            margin-top: 5px;
+            word-break: break-all;
+        }
 
         footer { border-top: 1px solid var(--card-border); padding: 2rem; text-align: center; color: var(--text-muted); margin-top: 4rem; }
 
@@ -274,19 +286,18 @@
             </ul>
             
             <div class="auth-btns" id="authButtons">
-                <!-- Giriş Yapılmamışsa Görünecek Alan -->
                 <div id="guestGroup" style="display: flex; gap: 10px;">
                     <button type="button" class="btn btn-secondary" onclick="openModal('loginModal')">Giriş Yap</button>
                     <button type="button" class="btn btn-primary" onclick="openModal('registerModal')">Kayıt Ol</button>
                 </div>
 
-                <!-- Giriş Yapılmışsa Görünecek Profil Alanı -->
                 <div id="userGroup" style="display: none; position: relative;">
                     <button type="button" class="btn btn-secondary" id="userMenuBtn">
                         <i class="fa-solid fa-user"></i> <span id="userEmailText">Kullanıcı</span> <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
                     </button>
                     <div class="user-dropdown" id="userDropdown">
                         <button type="button" id="openProfileModalBtn"><i class="fa-solid fa-id-card"></i> Kişisel Bilgiler</button>
+                        <button type="button" id="openTeacherPanelBtn" style="display: none;"><i class="fa-solid fa-chalkboard-teacher"></i> Öğretmen Kod Sayfası</button>
                         <hr style="border: 0.5px solid var(--card-border); margin: 5px 0;">
                         <button type="button" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
                     </div>
@@ -357,7 +368,7 @@
         <div class="coins-grid" id="coinsContainer"></div>
     </section>
 
-    <!-- Giriş Modalı -->
+    <!-- Modallar -->
     <div id="loginModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('loginModal')">&times;</span>
@@ -370,7 +381,6 @@
         </div>
     </div>
 
-    <!-- Kayıt Ol Modalı -->
     <div id="registerModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('registerModal')">&times;</span>
@@ -403,8 +413,54 @@
                         <option value="10">10. Sınıf</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Bilgileri Hesaba Kaydet</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Bilgileri Kaydet</button>
             </form>
+        </div>
+    </div>
+
+    <!-- Soru Modalı: Yetkili Misiniz? -->
+    <div id="authQuestionModal" class="modal">
+        <div class="modal-content" style="text-align: center;">
+            <i class="fa-solid fa-shield-halved" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+            <h3>Yetkili misiniz?</h3>
+            <p style="color: var(--text-muted); margin: 15px 0;">Öğretmen yetkisi ve özel kod panelini kullanmak için doğrulanmanız gerekir.</p>
+            <div style="display: flex; gap: 10px; justify-content: center;">
+                <button type="button" class="btn btn-primary" id="authYesBtn">Evet</button>
+                <button type="button" class="btn btn-secondary" id="authNoBtn">Hayır</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kod Doğrulama Modalı -->
+    <div id="authCodeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('authCodeModal')">&times;</span>
+            <h3 style="margin-bottom: 1rem; text-align: center;">Yetkili Kodu Girişi</h3>
+            <div class="form-group">
+                <label>Lütfen Yetkili Kodunu Giriniz:</label>
+                <input type="password" id="authorizedCodeInput" placeholder="S-Studio">
+            </div>
+            <button type="button" class="btn btn-primary" id="submitAuthCodeBtn" style="width: 100%;">Doğrula ve Giriş Yap</button>
+        </div>
+    </div>
+
+    <!-- Özel Öğretmen Kod Oluşturma Sayfası (Modal) -->
+    <div id="teacherPanelModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('teacherPanelModal')">&times;</span>
+            <h3 style="margin-bottom: 0.5rem; text-align: center; color: var(--primary);">Öğretmen Kodu Paneli</h3>
+            <p style="text-align: center; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 1.5rem;">Minecraft sunucusunda öğretmen yetkisi sağlayacak özel kodlar üretebilirsiniz.</p>
+            
+            <div style="text-align: center; margin-bottom: 1.5rem;">
+                <div>Kalan Kod Üretme Hakkınız: <b id="remainingAttemptsText" style="color: var(--primary); font-size: 1.2rem;">3</b> / 3</div>
+            </div>
+
+            <button type="button" class="btn btn-primary" id="generateTeacherCodeBtn" style="width: 100%;">Yeni Öğretmen Kodu Oluştur</button>
+
+            <div id="generatedCodeContainer" style="display: none; margin-top: 1.5rem; text-align: center;">
+                <label style="font-size: 0.85rem; color: var(--text-muted);">Oluşturulan MC Öğretmen Kodu:</label>
+                <div class="code-box" id="teacherCodeDisplay">---</div>
+            </div>
         </div>
     </div>
 
