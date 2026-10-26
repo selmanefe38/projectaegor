@@ -4,7 +4,9 @@ const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBh
 
 const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// Arayüzü Kullanıcı Oturumuna Göre Güncelleme
+let teacherCodeCount = 0; // Maksimum 3 kullanım takibi
+
+// Arayüzü Giriş Durumuna Göre Değiştirme
 async function syncUserUI() {
     try {
         const { data: { session } } = await db.auth.getSession();
@@ -25,7 +27,7 @@ async function syncUserUI() {
     }
 }
 
-// Kullanıcı Profil Bilgilerini Veritabanından Yükleme
+// Profil Bilgilerini Yükleme
 async function loadUserProfile() {
     const { data: { session } } = await db.auth.getSession();
     if (!session) return;
@@ -90,7 +92,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Kişisel Bilgileri Hesaba (Database) Kaydetme
+    // Kişisel Bilgileri Hesaba Kaydetme
     const profileForm = document.getElementById('profileForm');
     if (profileForm) {
         profileForm.addEventListener('submit', async (e) => {
@@ -121,11 +123,81 @@ document.addEventListener('DOMContentLoaded', async () => {
             } else {
                 alert("Profil Bilgileriniz Hesabınıza Başarıyla Kaydedildi!");
                 closeModal('profileModal');
+                // Kaydettikten sonra soru modalını aç
+                openModal('authQuestionModal');
             }
         });
     }
 
-    // Kişisel Bilgiler Modalı Açıldığında Verileri Getir
+    // "Yetkili Misiniz?" - "Evet" Butonu
+    const authYesBtn = document.getElementById('authYesBtn');
+    if (authYesBtn) {
+        authYesBtn.addEventListener('click', () => {
+            closeModal('authQuestionModal');
+            openModal('authCodeModal');
+        });
+    }
+
+    // "Yetkili Misiniz?" - "Hayır" Butonu
+    const authNoBtn = document.getElementById('authNoBtn');
+    if (authNoBtn) {
+        authNoBtn.addEventListener('click', () => {
+            closeModal('authQuestionModal');
+            alert("Kayıt tamamlandı, iyi oyunlar!");
+        });
+    }
+
+    // Yetkili Kodu Doğrulama Butonu (S-Studio Kontrolü)
+    const submitAuthCodeBtn = document.getElementById('submitAuthCodeBtn');
+    if (submitAuthCodeBtn) {
+        submitAuthCodeBtn.addEventListener('click', () => {
+            const codeInput = document.getElementById('authorizedCodeInput').value.trim();
+            
+            if (codeInput === 'S-Studio') {
+                alert("Yetkili Kodu Doğrulandı! Öğretmen Kodu Sayfanız Açıldı.");
+                closeModal('authCodeModal');
+                
+                // Sağ üst menüde Öğretmen Kod Sayfası butonunu görünür yap
+                const openTeacherPanelBtn = document.getElementById('openTeacherPanelBtn');
+                if (openTeacherPanelBtn) openTeacherPanelBtn.style.display = 'block';
+
+                // Öğretmen Kod Sayfasını Aç
+                openModal('teacherPanelModal');
+            } else {
+                alert("Hatalı Kod! Kabul edilmedi. (Kod: S-Studio olmalıdır)");
+            }
+        });
+    }
+
+    // Öğretmen Kodu Oluşturma İşlemi (Maksimum 3 Hakkı Var)
+    const generateTeacherCodeBtn = document.getElementById('generateTeacherCodeBtn');
+    if (generateTeacherCodeBtn) {
+        generateTeacherCodeBtn.addEventListener('click', () => {
+            if (teacherCodeCount >= 3) {
+                alert("Çok fazla kullandın!");
+                return;
+            }
+
+            teacherCodeCount++;
+            
+            // Rastgele MC Öğretmen Kodu Üret
+            const randomCode = 'MC-TEACHER-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            
+            document.getElementById('teacherCodeDisplay').textContent = randomCode;
+            document.getElementById('generatedCodeContainer').style.display = 'block';
+            document.getElementById('remainingAttemptsText').textContent = (3 - teacherCodeCount);
+
+            alert(`Öğretmen Kodu Başarıyla Oluşturuldu!\nKodunuz: ${randomCode}\nKalan Hakkınız: ${3 - teacherCodeCount}`);
+
+            if (teacherCodeCount === 3) {
+                generateTeacherCodeBtn.disabled = true;
+                generateTeacherCodeBtn.style.opacity = '0.5';
+                generateTeacherCodeBtn.textContent = 'Limit Dolduruldu (3/3)';
+            }
+        });
+    }
+
+    // Açılır Menüden Profil Aç
     const openProfileModalBtn = document.getElementById('openProfileModalBtn');
     if (openProfileModalBtn) {
         openProfileModalBtn.addEventListener('click', async () => {
@@ -134,7 +206,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Çıkış Yap Butonu
+    // Açılır Menüden Öğretmen Paneli Aç
+    const openTeacherPanelBtn = document.getElementById('openTeacherPanelBtn');
+    if (openTeacherPanelBtn) {
+        openTeacherPanelBtn.addEventListener('click', () => {
+            openModal('teacherPanelModal');
+        });
+    }
+
+    // Çıkış Yap
     const logoutBtn = document.getElementById('logoutBtn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async (e) => {
@@ -146,7 +226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Sağ Üst Profil Menüsü Açma / Kapama
+    // Profil Menüsü Açma / Kapama
     const userMenuBtn = document.getElementById('userMenuBtn');
     const userDropdown = document.getElementById('userDropdown');
     if (userMenuBtn && userDropdown) {
