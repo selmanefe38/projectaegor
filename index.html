@@ -274,17 +274,19 @@
             </ul>
             
             <div class="auth-btns" id="authButtons">
+                <!-- Giriş Yapılmamışsa Görünecek Alan -->
                 <div id="guestGroup" style="display: flex; gap: 10px;">
                     <button type="button" class="btn btn-secondary" onclick="openModal('loginModal')">Giriş Yap</button>
                     <button type="button" class="btn btn-primary" onclick="openModal('registerModal')">Kayıt Ol</button>
                 </div>
 
+                <!-- Giriş Yapılmışsa Görünecek Profil Alanı -->
                 <div id="userGroup" style="display: none; position: relative;">
                     <button type="button" class="btn btn-secondary" id="userMenuBtn">
                         <i class="fa-solid fa-user"></i> <span id="userEmailText">Kullanıcı</span> <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
                     </button>
                     <div class="user-dropdown" id="userDropdown">
-                        <button type="button" onclick="openModal('profileModal')"><i class="fa-solid fa-id-card"></i> Kişisel Bilgiler</button>
+                        <button type="button" id="openProfileModalBtn"><i class="fa-solid fa-id-card"></i> Kişisel Bilgiler</button>
                         <hr style="border: 0.5px solid var(--card-border); margin: 5px 0;">
                         <button type="button" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
                     </div>
@@ -401,7 +403,7 @@
                         <option value="10">10. Sınıf</option>
                     </select>
                 </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">Bilgileri Kaydet</button>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Bilgileri Hesaba Kaydet</button>
             </form>
         </div>
     </div>
