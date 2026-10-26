@@ -2,14 +2,13 @@
 const SUPABASE_URL = 'https://bkeckhwhakvrmgdifukg.supabase.co';
 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJrZWNraHdoYWt2cm1nZGlmdWtnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMwMTg2NDEsImV4cCI6MjEwODU5NDY0MX0.Y3n4B8g6K8Wr_HSxD4NH9Sc7bMlZkG-gcz_Q2DQSiNw';
 
-// Çakışmayı önlemek için güvenli tanımlama
-window.supabase = window.supabase || window.supabase;
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+// Çakışmayı %100 önlemek için değişken adını 'db' yaptık
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // Arayüzü Giriş Durumuna Göre Değiştiren Ana Fonksiyon
 async function syncUserUI() {
     try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { data: { session } } = await db.auth.getSession();
         const guestGroup = document.getElementById('guestGroup');
         const userGroup = document.getElementById('userGroup');
         const userEmailText = document.getElementById('userEmailText');
@@ -32,7 +31,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     await syncUserUI();
 
     // 2. Supabase Canlı Oturum Dinleyicisi
-    supabase.auth.onAuthStateChange(async (event, session) => {
+    db.auth.onAuthStateChange(async (event, session) => {
         await syncUserUI();
     });
 
@@ -44,7 +43,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const email = document.getElementById('loginEmail').value.trim();
             const password = document.getElementById('loginPassword').value;
 
-            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            const { data, error } = await db.auth.signInWithPassword({ email, password });
 
             if (error) {
                 alert("Giriş Hatası: " + error.message);
@@ -64,7 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const email = document.getElementById('registerEmail').value.trim();
             const password = document.getElementById('registerPassword').value;
 
-            const { data, error } = await supabase.auth.signUp({ email, password });
+            const { data, error } = await db.auth.signUp({ email, password });
 
             if (error) {
                 alert("Kayıt Hatası: " + error.message);
@@ -95,7 +94,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (logoutBtn) {
         logoutBtn.addEventListener('click', async (e) => {
             e.preventDefault();
-            await supabase.auth.signOut();
+            await db.auth.signOut();
             await syncUserUI();
             alert("Çıkış Yapıldı.");
             window.location.reload();
@@ -125,7 +124,7 @@ document.addEventListener('click', async (e) => {
     e.preventDefault();
     e.stopPropagation();
 
-    const { data: { session } } = await supabase.auth.getSession();
+    const { data: { session } } = await db.auth.getSession();
 
     if (!session) {
         alert("Giriş yapmalısınız!");
