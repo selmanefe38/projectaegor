@@ -12,8 +12,9 @@
             --primary: #fbbf24;
             --primary-hover: #f59e0b;
             --accent: #10b981;
+            --accent-hover: #059669;
             --bg-dark: #0f172a;
-            --card-bg: rgba(30, 41, 59, 0.8);
+            --card-bg: rgba(30, 41, 59, 0.85);
             --card-border: rgba(255, 255, 255, 0.12);
             --text-light: #f8fafc;
             --text-muted: #94a3b8;
@@ -80,9 +81,7 @@
             transition: color 0.3s;
         }
 
-        .nav-links a:hover {
-            color: var(--primary);
-        }
+        .nav-links a:hover { color: var(--primary); }
 
         .auth-btns {
             display: flex;
@@ -96,7 +95,7 @@
             border-radius: 10px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
             border: none;
             display: inline-flex;
             align-items: center;
@@ -105,14 +104,16 @@
             font-size: 0.95rem;
         }
 
-        .btn-primary { 
-            background: linear-gradient(135deg, var(--primary), var(--primary-hover)); 
-            color: #0f172a; 
-            box-shadow: 0 4px 15px rgba(251, 191, 36, 0.25);
+        .btn-green {
+            background: var(--accent);
+            color: #ffffff;
+            font-weight: 700;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
         }
-        .btn-primary:hover { 
-            transform: translateY(-2px); 
-            box-shadow: 0 6px 20px rgba(251, 191, 36, 0.4);
+        .btn-green:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
         }
 
         .btn-secondary { 
@@ -120,25 +121,13 @@
             color: var(--text-light); 
             border: 1px solid var(--card-border); 
         }
-        .btn-secondary:hover { 
-            background: rgba(255, 255, 255, 0.18); 
-        }
 
-        .btn-success {
-            background: linear-gradient(135deg, #10b981, #059669);
-            color: #fff;
-            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
-        }
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.5);
-        }
-
-        /* Yeşil Parıldayan İsim / Hoş Geldiniz Efekti */
-        .green-welcome-text {
-            color: #10b981 !important;
+        .green-welcome-btn {
+            background: rgba(16, 185, 129, 0.15) !important;
+            border: 1px solid var(--accent) !important;
+            color: var(--accent) !important;
             font-weight: 700 !important;
-            text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+            text-shadow: 0 0 8px rgba(16, 185, 129, 0.4);
         }
 
         .user-dropdown {
@@ -170,7 +159,7 @@
             transition: background 0.2s;
         }
 
-        .user-dropdown button:hover { background: rgba(255,255,255,0.1); color: var(--primary); }
+        .user-dropdown button:hover { background: rgba(255,255,255,0.1); color: var(--accent); }
         .user-dropdown button#logoutBtn:hover { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
 
         .hero {
@@ -210,33 +199,13 @@
             backdrop-filter: blur(10px);
         }
 
-        .ip-box .ip-text {
-            font-weight: 700;
-            color: var(--primary);
-            letter-spacing: 1px;
-        }
+        .ip-box .ip-text { font-weight: 700; color: var(--primary); letter-spacing: 1px; }
 
-        section {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 4rem 2rem;
-        }
+        section { max-width: 1200px; margin: 0 auto; padding: 4rem 2rem; }
+        .section-title { text-align: center; margin-bottom: 3rem; }
+        .section-title h2 { font-family: 'Fredoka', sans-serif; font-size: 2.2rem; }
 
-        .section-title {
-            text-align: center;
-            margin-bottom: 3rem;
-        }
-
-        .section-title h2 {
-            font-family: 'Fredoka', sans-serif;
-            font-size: 2.2rem;
-        }
-
-        .features-grid, .vip-grid, .coins-grid {
-            display: grid;
-            gap: 20px;
-        }
-
+        .features-grid, .vip-grid, .coins-grid { display: grid; gap: 20px; }
         .features-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
         .vip-grid { grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); justify-content: center; }
         .coins-grid { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
@@ -256,6 +225,7 @@
         .coin-card { text-align: center; transition: 0.3s; }
         .coin-card:hover { border-color: var(--accent); transform: scale(1.02); }
 
+        /* Resimdeki Gibi Tablı (Sekmeli) Giriş/Kayıt Modalı */
         .modal {
             display: none;
             position: fixed;
@@ -267,20 +237,14 @@
         }
 
         .modal-content {
-            background: #1e293b;
+            background: #182232;
             border: 1px solid var(--card-border);
-            padding: 2.5rem;
+            padding: 2rem 2.5rem;
             border-radius: 24px;
             width: 90%;
-            max-width: 420px;
+            max-width: 440px;
             position: relative;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-            animation: modalFade 0.3s ease-out;
-        }
-
-        @keyframes modalFade {
-            from { opacity: 0; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1); }
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
         }
 
         .close-modal {
@@ -288,33 +252,45 @@
         }
         .close-modal:hover { color: #fff; }
 
-        .form-group { margin-bottom: 1.3rem; }
-        .form-group label { display: block; margin-bottom: 6px; font-size: 0.88rem; color: var(--text-muted); font-weight: 500; }
+        .auth-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--card-border);
+            margin-bottom: 1.5rem;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: var(--text-muted);
+            border-bottom: 2px solid transparent;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            color: var(--accent);
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .form-row { display: flex; gap: 10px; }
+        .form-row .form-group { flex: 1; }
+
+        .form-group { margin-bottom: 1.1rem; }
+        .form-group label { display: block; margin-bottom: 6px; font-size: 0.88rem; color: var(--text-light); font-weight: 600; }
         .form-group input, .form-group select { 
             width: 100%; 
             padding: 12px 14px; 
             border-radius: 12px; 
             border: 1px solid var(--card-border); 
-            background: rgba(15, 23, 42, 0.8); 
+            background: rgba(10, 16, 26, 0.8); 
             color: #fff; 
             outline: none; 
             font-size: 0.95rem;
-            transition: border-color 0.3s;
         }
-        .form-group input:focus, .form-group select:focus { border-color: var(--primary); }
-
-        .code-box {
-            background: rgba(15, 23, 42, 0.9);
-            border: 1px solid var(--accent);
-            padding: 12px;
-            border-radius: 10px;
-            color: var(--accent);
-            font-family: monospace;
-            font-size: 1.1rem;
-            margin-top: 8px;
-            word-break: break-all;
-            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
-        }
+        .form-group input:focus, .form-group select:focus { border-color: var(--accent); }
 
         footer { border-top: 1px solid var(--card-border); padding: 2rem; text-align: center; color: var(--text-muted); margin-top: 4rem; }
 
@@ -339,21 +315,16 @@
             
             <div class="auth-btns" id="authButtons">
                 <div id="guestGroup" style="display: flex; gap: 10px;">
-                    <button type="button" class="btn btn-secondary" onclick="openModal('loginModal')">Giriş Yap</button>
-                    <button type="button" class="btn btn-primary" onclick="openModal('registerModal')">Kayıt Ol</button>
+                    <button type="button" class="btn btn-green" onclick="openAuthModal('login')">Giriş Yap / Kayıt Ol</button>
                 </div>
 
                 <div id="userGroup" style="display: none; position: relative;">
-                    <button type="button" class="btn btn-secondary" id="userMenuBtn">
-                        <i class="fa-solid fa-user-check" style="color: #10b981;"></i> 
-                        <span id="userEmailText" class="green-welcome-text">HOŞ GELDİNİZ!</span> 
+                    <button type="button" class="btn green-welcome-btn" id="userMenuBtn">
+                        <i class="fa-solid fa-user-check" style="color: var(--accent);"></i> 
+                        <span id="userWelcomeText">HOŞ GELDİNİZ!</span> 
                         <i class="fa-solid fa-chevron-down" style="font-size: 0.7rem;"></i>
                     </button>
                     <div class="user-dropdown" id="userDropdown">
-                        <div id="welcomeTextContainer" class="green-welcome-text" style="padding: 8px 12px; font-size: 0.9rem; border-bottom: 1px solid var(--card-border);">
-                            HOŞ GELDİNİZ!
-                        </div>
-                        <button type="button" id="openProfileModalBtn"><i class="fa-solid fa-id-card"></i> Kişisel Bilgiler</button>
                         <button type="button" id="openTeacherPanelBtn" style="display: none;"><i class="fa-solid fa-chalkboard-teacher" style="color: var(--primary);"></i> Öğretmen Kod Sayfası</button>
                         <hr style="border: 0.5px solid var(--card-border); margin: 5px 0;">
                         <button type="button" id="logoutBtn"><i class="fa-solid fa-right-from-bracket"></i> Çıkış Yap</button>
@@ -405,7 +376,7 @@
                     <div style="color:var(--text-muted); margin-bottom:1.5rem;">Süre: 1 Ay</div>
                     <p style="text-align:left; font-size:0.95rem;">• 10 Kişilik Özel Çalışma Odası<br>• Grup derslerine öncelik</p>
                 </div>
-                <button type="button" class="btn btn-primary buy-action-btn" style="width:100%; margin-top:20px;">İncele</button>
+                <button type="button" class="btn btn-green buy-action-btn" style="width:100%; margin-top:20px;">İncele</button>
             </div>
             <div class="vip-card popular">
                 <div class="badge">En Popüler</div>
@@ -415,7 +386,7 @@
                     <div style="color:var(--text-muted); margin-bottom:1.5rem;">Süre: 2 Ay</div>
                     <p style="text-align:left; font-size:0.95rem;">• 1 Kişilik Birebir Ders Odası<br>• Sınırsız Ders Tekrarı</p>
                 </div>
-                <button type="button" class="btn btn-primary buy-action-btn" style="width:100%; margin-top:20px;">İncele</button>
+                <button type="button" class="btn btn-green buy-action-btn" style="width:100%; margin-top:20px;">İncele</button>
             </div>
         </div>
     </section>
@@ -425,44 +396,48 @@
         <div class="coins-grid" id="coinsContainer"></div>
     </section>
 
-    <!-- Giriş Yap Modalı -->
-    <div id="loginModal" class="modal">
+    <!-- Resimdeki Gibi Tablı Giriş / Kayıt Modalı -->
+    <div id="authModal" class="modal">
         <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('loginModal')">&times;</span>
-            <h3 style="margin-bottom: 1.5rem; text-align: center; font-family: 'Fredoka'; font-size: 1.8rem; color: var(--primary);">Giriş Yap</h3>
+            <span class="close-modal" onclick="closeModal('authModal')">&times;</span>
+            
+            <div class="auth-tabs">
+                <div class="auth-tab active" id="tabLogin" onclick="switchTab('login')">Giriş Yap</div>
+                <div class="auth-tab" id="tabRegister" onclick="switchTab('register')">Kayıt Ol</div>
+            </div>
+
+            <!-- Giriş Formu -->
             <form id="loginForm">
-                <div class="form-group"><label>E-Posta</label><input type="email" id="loginEmail" required placeholder="ornek@mail.com"></div>
-                <div class="form-group"><label>Şifre</label><input type="password" id="loginPassword" required placeholder="••••••••"></div>
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">Giriş Yap</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Kayıt Ol Modalı -->
-    <div id="registerModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('registerModal')">&times;</span>
-            <h3 style="margin-bottom: 1.5rem; text-align: center; font-family: 'Fredoka'; font-size: 1.8rem; color: var(--primary);">Kayıt Ol</h3>
-            <form id="registerForm">
-                <div class="form-group"><label>E-Posta Adresi</label><input type="email" id="registerEmail" required placeholder="ornek@mail.com"></div>
-                <div class="form-group"><label>Şifre (En az 6 karakter)</label><input type="password" id="registerPassword" required placeholder="••••••••"></div>
-                <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">Hesap Oluştur</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Kişisel Bilgiler Modalı -->
-    <div id="profileModal" class="modal">
-        <div class="modal-content">
-            <span class="close-modal" onclick="closeModal('profileModal')">&times;</span>
-            <h3 style="margin-bottom: 1.5rem; text-align: center; font-family: 'Fredoka'; font-size: 1.8rem;">Kişisel Bilgiler</h3>
-            <form id="profileForm">
-                <div class="form-group"><label>İsim</label><input type="text" id="profileName" required placeholder="İsminiz"></div>
-                <div class="form-group"><label>Soyisim</label><input type="text" id="profileSurname" required placeholder="Soyisminiz"></div>
-                <div class="form-group"><label>Minecraft İsmi (IGN)</label><input type="text" id="profileMcName" required placeholder="Oyundaki Adınız"></div>
                 <div class="form-group">
-                    <label>Sınıfınız</label>
-                    <select id="profileClass" required>
+                    <label>E-Posta</label>
+                    <input type="email" id="loginEmail" required placeholder="ornek@okul.com">
+                </div>
+                <div class="form-group">
+                    <label>Şifre</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-green" style="width: 100%; padding: 12px; margin-top: 10px;">Giriş Yap</button>
+            </form>
+
+            <!-- Kayıt Ol Formu (Tam Ekran Görüntüsündeki Gibi) -->
+            <form id="registerForm" style="display: none;">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Ad</label>
+                        <input type="text" id="regName" required placeholder="Ahmet">
+                    </div>
+                    <div class="form-group">
+                        <label>Soyad</label>
+                        <input type="text" id="regSurname" required placeholder="Yılmaz">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Minecraft Kullanıcı Adı (IGN)</label>
+                    <input type="text" id="regMcName" required placeholder="Steve_Pro">
+                </div>
+                <div class="form-group">
+                    <label>Sınıf Seçimi</label>
+                    <select id="regClass" required>
                         <option value="5">5. Sınıf</option>
                         <option value="6">6. Sınıf</option>
                         <option value="7">7. Sınıf</option>
@@ -471,7 +446,15 @@
                         <option value="10">10. Sınıf</option>
                     </select>
                 </div>
-                <button type="button" id="saveProfileDirectBtn" class="btn btn-primary" style="width: 100%; padding: 12px; margin-top: 10px;">Bilgileri Hesaba Kaydet</button>
+                <div class="form-group">
+                    <label>E-Posta</label>
+                    <input type="email" id="regEmail" required placeholder="ornek@okul.com">
+                </div>
+                <div class="form-group">
+                    <label>Şifre</label>
+                    <input type="password" id="regPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="btn btn-green" style="width: 100%; padding: 12px; margin-top: 10px;">Kayıt Ol</button>
             </form>
         </div>
     </div>
@@ -480,33 +463,34 @@
     <div id="authQuestionModal" class="modal">
         <div class="modal-content" style="text-align: center;">
             <i class="fa-solid fa-shield-halved" style="font-size: 3.5rem; color: #10b981; margin-bottom: 1rem;"></i>
-            <h3 style="font-family: 'Fredoka'; font-size: 1.8rem; margin-bottom: 0.5rem; color: #10b981;">Bilgiler Kaydedildi!</h3>
+            <h3 style="font-family: 'Fredoka'; font-size: 1.8rem; margin-bottom: 0.5rem; color: #10b981;">Kayıt Başarılı!</h3>
             <p style="font-size: 1.1rem; font-weight: 600; margin-bottom: 1rem;">Yetkili misiniz?</p>
-            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Öğretmen yetkisi ve özel kod panelini açmak için yetkili doğrulamanız gerekmektedir.</p>
+            <p style="color: var(--text-muted); margin-bottom: 1.5rem; font-size: 0.9rem;">Öğretmen yetkisi ve özel kod panelini açmak için yetkili doğrulaması gerekir.</p>
             <div style="display: flex; gap: 12px; justify-content: center;">
-                <button type="button" class="btn btn-success" id="authYesBtn" style="padding: 10px 30px;">Evet</button>
+                <button type="button" class="btn btn-green" id="authYesBtn" style="padding: 10px 30px;">Evet</button>
                 <button type="button" class="btn btn-secondary" id="authNoBtn" style="padding: 10px 30px;">Hayır</button>
             </div>
         </div>
     </div>
 
-    <!-- Kod Doğrulama Modalı (Örnek Şifre Yazısı Kaldırıldı!) -->
+    <!-- Kod Doğrulama Modalı (Geliştirildi, Kutu Tamamen Boş) -->
     <div id="authCodeModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('authCodeModal')">&times;</span>
             <div style="text-align: center; margin-bottom: 1rem;">
-                <i class="fa-solid fa-key" style="font-size: 2.5rem; color: var(--primary);"></i>
+                <i class="fa-solid fa-key" style="font-size: 2.5rem; color: var(--accent);"></i>
             </div>
-            <h3 style="margin-bottom: 1rem; text-align: center; font-family: 'Fredoka'; font-size: 1.6rem; color: var(--primary);">Yetkili Kodu Girişi</h3>
+            <h3 style="margin-bottom: 1rem; text-align: center; font-family: 'Fredoka'; font-size: 1.6rem; color: var(--accent);">Yetkili Kodu Girişi</h3>
             <div class="form-group">
                 <label>Lütfen Özel Yetkili Kodunuzu Giriniz:</label>
-                <input type="password" id="authorizedCodeInput" placeholder="Yetkili kodunu giriniz...">
+                <!-- İpucu / örnek yazı tamamen kaldırıldı -->
+                <input type="password" id="authorizedCodeInput" autocomplete="off">
             </div>
-            <button type="button" class="btn btn-primary" id="submitAuthCodeBtn" style="width: 100%; padding: 12px; margin-top: 5px;">Doğrula ve Giriş Yap</button>
+            <button type="button" class="btn btn-green" id="submitAuthCodeBtn" style="width: 100%; padding: 12px; margin-top: 5px;">Doğrula ve Giriş Yap</button>
         </div>
     </div>
 
-    <!-- Özel Öğretmen Kod Oluşturma Sayfası (Modal) -->
+    <!-- Öğretmen Kod Oluşturma Sayfası -->
     <div id="teacherPanelModal" class="modal">
         <div class="modal-content">
             <span class="close-modal" onclick="closeModal('teacherPanelModal')">&times;</span>
@@ -517,11 +501,11 @@
                 <div>Kalan Kod Üretme Hakkınız: <b id="remainingAttemptsText" style="color: #10b981; font-size: 1.2rem;">3</b> / 3</div>
             </div>
 
-            <button type="button" class="btn btn-success" id="generateTeacherCodeBtn" style="width: 100%; padding: 12px;">Yeni Öğretmen Kodu Oluştur</button>
+            <button type="button" class="btn btn-green" id="generateTeacherCodeBtn" style="width: 100%; padding: 12px;">Yeni Öğretmen Kodu Oluştur</button>
 
             <div id="generatedCodeContainer" style="display: none; margin-top: 1.5rem; text-align: center;">
                 <label style="font-size: 0.85rem; color: var(--text-muted);">Oluşturulan MC Öğretmen Kodu:</label>
-                <div class="code-box" id="teacherCodeDisplay">---</div>
+                <div style="background: rgba(10, 16, 26, 0.9); border: 1px solid var(--accent); padding: 12px; border-radius: 10px; color: var(--accent); font-family: monospace; font-size: 1.1rem; margin-top: 8px;" id="teacherCodeDisplay">---</div>
             </div>
         </div>
     </div>
@@ -549,6 +533,30 @@
                 coinsContainer.appendChild(card);
                 initialCoins *= 2;
                 initialPrice *= 2;
+            }
+        }
+
+        function openAuthModal(type) {
+            switchTab(type);
+            openModal('authModal');
+        }
+
+        function switchTab(type) {
+            const tabLogin = document.getElementById('tabLogin');
+            const tabRegister = document.getElementById('tabRegister');
+            const loginForm = document.getElementById('loginForm');
+            const registerForm = document.getElementById('registerForm');
+
+            if (type === 'login') {
+                tabLogin.classList.add('active');
+                tabRegister.classList.remove('active');
+                loginForm.style.display = 'block';
+                registerForm.style.display = 'none';
+            } else {
+                tabRegister.classList.add('active');
+                tabLogin.classList.remove('active');
+                registerForm.style.display = 'block';
+                loginForm.style.display = 'none';
             }
         }
 
